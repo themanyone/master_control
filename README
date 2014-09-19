@@ -1,0 +1,97 @@
+master_control
+==============
+
+The ultimate app! iRadio, DVD player, HD webcam, desktop recorder, editor, slideshow, podcasts...
+
+Now with editable documentation to remind you that
+Master Control puts YOU in charge. Write your own docs!
+
+Master Control can
+
+  * play Internet radio
+  * make a slide show from multiple images
+  * play DVDs (Press Ctrl+Shift+V to Pop-up video first)
+  * record HD video from a webcam at 30fps
+  * broadcast webm, videoconferencing
+  * create breathtaking timelapse video
+  * edit text with it's built-in editor
+  * build and share multimedia pipelines
+  * mix and mux, stream live videos, tee to disk
+  * generate mixer panels, pads, tweak live streams
+  * filter, effects, remove audio and video noise
+  * do live editing, overlays, multiple sources
+  * desktop screen cap with webcam overlays
+  * picture-in-picture, subtitles
+  * synthesize speech (requires festival)
+  * voice recognition subtitles (requires pocketsphinx)
+  * capture DV via firewire and transcode.
+  * ... limitless other things
+ 
+It's the do-all and be-everything app!
+
+Tutorial
+
+To start: python master_control.py
+
+Choose a mode from the drop-down menu, for example, simple webcam 
+viewer. The editor's contents and tabs will change to display the 
+GStreamer Pipeline we created to invoke the webcam viewer.
+
+GStreamer Pipelines
+
+According to the documentation that installs with entrans at 
+/usr/share/doc/gst-entrans-1.0.2/html/howto.html#idp52976, (location 
+may change) a GStreamer Pipeline is a directed graph of media 
+handlers or plugins (elements). Each element has "pads" which are 
+kind of like plugs and sockets that connect them together. An 
+exclamation point, "!" behaves like a "pipe symbol" connecting the 
+elements' "src" and "sink" pads. See the man pages for gst-launch for 
+more information about constructing GStreamer pipelines.
+
+Help on Elements
+
+Double-click on v4l2src to highlight it in the Master Control editor. 
+Press Ctrl+I, or navigate to the Help menu -> Inspect selected. A 
+search-able window will pop up describing the v4l2src plugin and what 
+can be done with it. This is for convenience. The same information 
+may be obtained by typing "gst-inspect v4l2src" in a terminal window.
+   
+Scroll down to where gst-inspect shows information about brightness 
+and contrast. These values may be specified in the pipeline at 
+startup, or adjusted in the tabs during runtime. For example, change 
+the first stanza in the editor to "v4l2src brightness=200".
+
+The Refresh Button
+
+Press the F5 key to stop, and re-start (refresh) the stream. This is 
+the same as pressing the Stop and Play buttons.
+
+Use Tabs
+
+Click on the v4l2src tab and adjust the brightness there. The 
+controls are tricky to use at this time. The reason is that plugins 
+are reporting ridiculous values for max and min. You may have to 
+click the button below the control to reset the value to default, and 
+then click next to the control, not really on it. Then adjust the 
+value up and down with the keyboard's arrow keys. Use the Page Up and 
+Page Down keys to change the value by 100 each time.
+
+Error Handling
+
+Master Control pipelines are equivalent to running entrans in raw 
+mode. There are no advanced error handling routines, or auto-plugging 
+of elements. Most errors are trapped and simply ignored. If a 
+pipeline doesn't work, try experimenting. The majority of problems 
+result from mis-matching of elements, or an element is supplying a 
+format that the next one in the chain does not understand. A good 
+reading of the GStreamer documentation will help to minimize errors.
+
+Matching Caps
+
+It is recommended that users look at the src and sink pads of the 
+elements they wish to connect, and insert caps, e.g. " ! 
+video/x-raw-yuv,format=(fourcc)I420" between them, to make sure the 
+upstream element in the chain is sending out a format that the 
+receiving elements are compatible with. When there are no matching 
+caps, then some other conversion element, such as "ffmpegcolorspace" 
+would be necessary to supply the matching caps.
