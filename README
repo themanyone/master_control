@@ -5,25 +5,27 @@ Master Control puts YOU in charge. Write your own docs!
 
 Master Control can
 
-  * play Internet radio
-  * make a slide show from multiple images
-  * play DVDs (Press Ctrl+Shift+V to Pop-up video first)
-  * record HD video from a webcam at 30fps
-  * broadcast webm, videoconferencing
-  * create breathtaking timelapse video
-  * edit text with it's built-in editor
-  * build and share multimedia pipelines
-  * mix and mux, stream live videos, tee to disk
-  * generate mixer panels, pads, tweak live streams
-  * filter, effects, remove audio and video noise
-  * do live editing, overlays, multiple sources
-  * desktop screen cap with webcam overlays
-  * picture-in-picture, subtitles
-  * synthesize speech (requires festival)
-  * voice recognition subtitles (requires pocketsphinx)
-  * capture DV via firewire and transcode.
-  * ... limitless other things
- 
+    * play Internet radio
+    * make a slide show from images
+    * play DVDs fullscreen
+    * record good HD video from a webcam
+    * record the desktop, with audio
+    * spectrum analyzer, oscilliscope
+    * broadcast webm, videoconferencing
+    * record breathtaking timelapse video
+    * edit text with it's built-in editor
+    * build and share multimedia pipelines
+    * mix and re-mux, stream live videos
+    * write files, multiple sources, sinks
+    * generate mixer panels, pads, tweak
+    * filter, effects, remove noise
+    * picture-in-picture, subtitles
+    * synthesize speech (requires festival)
+    * voice recognition subtitles (requires pocketsphinx)
+    * capture DV via firewire and transcode.
+    * combine any of the above
+    * ... limitless other things
+
 It's the do-all and be-everything app!
 
 Tutorial

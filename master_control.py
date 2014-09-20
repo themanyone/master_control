@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Name: Master Control
-# Info: Edit Gstreamer pipelines and adjust individual elements
+# Info: Master Control does it all for ultimate multimedia control.
 # Status: Pre-release
 # Version: 0.1
 
@@ -240,10 +240,12 @@ class Master(object):
                 widget.set_tooltip_text(handler.__doc__)
                 button_box.pack_start(widget, False)
                 setattr(self, name, widget)
+            self.controls[0][1].connect("clicked",self.on_play)
+            setattr(self,self.controls[0][0],self.controls[0][1])
             # put pipeline selector here
             dropdown = self.dropdown = selector_widget(make_model(data))
             dropdown.connect("changed",self.change_pipeline)
-            dropdown.set_active(8)
+            dropdown.set_active(9)
             dropdown.set_size_request(245,20)
             button_box.pack_start(dropdown, False)
             vbox.pack_start(button_box,False)
@@ -656,23 +658,30 @@ class Master(object):
     def update_play_buttons(self, state):
         if state == gst.STATE_NULL:
             self.play_button.set_sensitive(True)
+            self.record_button.set_sensitive(True)
             self.pause_button.set_sensitive(False)
             self.stop_button.set_sensitive(False)
         elif state == gst.STATE_READY:
             self.play_button.set_sensitive(True)
+            self.record_button.set_sensitive(True)
             self.pause_button.set_sensitive(False)
             self.stop_button.set_sensitive(False)
         elif state == gst.STATE_PAUSED:
             self.play_button.set_sensitive(True)
+            self.record_button.set_sensitive(True)
             self.pause_button.set_sensitive(False)
             self.stop_button.set_sensitive(True)
         elif state == gst.STATE_PLAYING:
             self.play_button.set_sensitive(False)
+            self.record_button.set_sensitive(False)
             self.pause_button.set_sensitive(True)
             self.stop_button.set_sensitive(True)
     def cb_message(self, bus, msg):
         """Receive element messages from the bus."""
         if msg.structure is None:
+            if msg.type == gst.MESSAGE_EOS:
+                self.show_msg("EOS received. Stopping.")
+                self.on_stop()
             return
         msgname = msg.structure.get_name()
         if msg.type == gst.MESSAGE_ELEMENT:
@@ -692,9 +701,6 @@ class Master(object):
             old, new, pending = msg.parse_state_changed()
             self.update_play_buttons(new)
             self.show_msg(new)
-        elif msg.type == gst.MESSAGE_EOS:
-            # fixme: doesn't work
-            print("EOS")
         return gst.BUS_PASS
     def pad_window(self, widget, event, pad=None):
         """Populate Pad Window with controls"""

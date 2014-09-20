@@ -19,6 +19,12 @@ data = (('iRadio with 10-band EQ',
          'autoaudiosrc \n'
          ' ! audioconvert ! vorbisenc ! mux.audio_0 pq. ! queue leaky=1 \n'
          ' ! jpegdec ! autovideosink'),
+        ('Grab audio from video',
+         'filesrc location=/tmp/cam.mkv \n'
+         ' ! matroskademux\n'
+         ' ! vorbisdec\n'
+         ' ! wavenc\n'
+         ' ! filesink location=/tmp/cam.wav'),
         ('Webcam Timelapse 5->25fps',
          'matroskamux name=mux ! filesink \n'
          'location=/tmp/cam.mkv \n'
