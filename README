@@ -1,15 +1,15 @@
-Never fear. Master Control is here!
+=Master Control by Henry Kroll=
 
-Now with editable documentation to remind you that
-Master Control puts YOU in charge. Write your own docs!
+It's the do-all and be-everything app!
 
-Master Control can
+Master Control can (short list)
 
     * play Internet radio
     * make a slide show from images
     * play DVDs fullscreen
     * record good HD video from a webcam
     * record the desktop, with audio
+    * grab audio from a video file
     * spectrum analyzer, oscilliscope
     * broadcast webm, videoconferencing
     * record breathtaking timelapse video
@@ -26,28 +26,74 @@ Master Control can
     * combine any of the above
     * ... limitless other things
 
-It's the do-all and be-everything app!
+=Installation=
 
-Tutorial
+Master Control is fully cross-platform, open-source, and released 
+under the Gnu Public License, Version 3. The following packages, upon 
+which Master Control depends, may be downloaded, or compiled for just 
+about any operating system.
 
-To start: python master_control.py
+    * [http://www.python.org/ Python 2.7]
+    * [http://www.pygtk.org/ pygtk2]
+    * [http://gstreamer.freedesktop.org/ gstreamer, including gstreamer-python]
+    * [http://gtksourceview.sourceforge.net/ gtksourceview2]
+
+On Fedora, for example, install these dependencies.
+
+{{{
+su -c 'yum -y install pygtk2 gstreamer-python pygtksourceview gtksourceview2'
+}}}
+
+Windows builds of these dependencies are available from 
+[https://code.google.com/p/ossbuild/ ossbuild].
+
+Master Control is maintained on 
+[https://github.com/themanyone/master_control/ GitHub]. The latest 
+version may be obtained using git: `git clone 
+https://github.com/themanyone/master_control`
+
+Or download the .zip file: [[Download Now]] class="myButton inline" 
+https://github.com/themanyone/master_control/archive/master.zip
+
+Future expansion prospects are very good since new GStreamer plugins are becoming available. For instance, non-linear editing may already be possible via [http://freecode.com/projects/gnonlin GNonLin].
+
+=Usage=
+
+There is no desktop icon yet. Right-click on the desktop to create one.
+Launching the program may be done via the Python interpreter.
+
+    python master_control.py
 
 Choose a mode from the drop-down menu, for example, simple webcam 
-viewer. The editor's contents and tabs will change to display the 
+viewer. The application should start displaying an image from the 
+webcam. The editor's contents and tabs will change to display the 
 GStreamer Pipeline we created to invoke the webcam viewer.
 
-GStreamer Pipelines
+Windows note: [https://code.google.com/p/ossbuild/ ossbuild] contains 
+a build system to support GStreamer for Windows. To make the webcam 
+work on Windows with ossbuild, change `v4l2src` to `ksvideosrc 
+device-index=0`.
 
-According to the documentation that installs with entrans at 
-/usr/share/doc/gst-entrans-1.0.2/html/howto.html#idp52976, (location 
-may change) a GStreamer Pipeline is a directed graph of media 
-handlers or plugins (elements). Each element has "pads" which are 
-kind of like plugs and sockets that connect them together. An 
-exclamation point, "!" behaves like a "pipe symbol" connecting the 
-elements' "src" and "sink" pads. See the man pages for gst-launch for 
-more information about constructing GStreamer pipelines.
+==Known Issues==
 
-Help on Elements
+Master Control's HD webcam recorder may not work for everyone. It assumes the webcam can hardware-encode motion jpeg (MJPEG) video. If it does not work, try raw video. Use `video/x-raw-yuv` instead of the `image/jpeg` caps, and get rid of the `jpegdec` decoder. To discover the webcam's capabilities, use `v4l2-ctl --list-formats-ext`.
+
+[http://gentrans.sourceforge.net/docs/head/manual/html/howto.html More info about transcoding with Gstreamer.]
+
+[http://wiki.oz9aec.net/index.php/Gstreamer_cheat_sheet Gstreamer Cheat Sheet]
+
+==GStreamer Pipelines==
+
+According to the 
+[file:///usr/share/doc/gst-entrans-1.0.2/html/howto.html 
+documentation that installs with entrans], a GStreamer Pipeline is a 
+directed graph of media handlers or plugins (elements). Each element 
+has "pads" which are kind of like plugs and sockets that connect them 
+together. An exclamation point, "!" behaves like a "pipe symbol" 
+connecting the elements' "src" and "sink" pads. See the man pages for 
+gst-launch for more information about constructing GStreamer pipelines.
+
+==Help on Elements==
 
 Double-click on v4l2src to highlight it in the Master Control editor. 
 Press Ctrl+I, or navigate to the Help menu -> Inspect selected. A 
@@ -60,12 +106,12 @@ and contrast. These values may be specified in the pipeline at
 startup, or adjusted in the tabs during runtime. For example, change 
 the first stanza in the editor to "v4l2src brightness=200".
 
-The Refresh Button
+==The Refresh Button==
 
 Press the F5 key to stop, and re-start (refresh) the stream. This is 
 the same as pressing the Stop and Play buttons.
 
-Use Tabs
+==Use Tabs==
 
 Click on the v4l2src tab and adjust the brightness there. The 
 controls are tricky to use at this time. The reason is that plugins 
@@ -75,17 +121,17 @@ then click next to the control, not really on it. Then adjust the
 value up and down with the keyboard's arrow keys. Use the Page Up and 
 Page Down keys to change the value by 100 each time.
 
-Error Handling
+==Error Handling==
 
 Master Control pipelines are equivalent to running entrans in raw 
-mode. There are no advanced error handling routines, or auto-plugging 
-of elements. Most errors are trapped and simply ignored. If a 
+mode. There is some rudimentary error handling, and auto-plugging 
+of elements is provided by plugins like autoaudiosrc. If a 
 pipeline doesn't work, try experimenting. The majority of problems 
 result from mis-matching of elements, or an element is supplying a 
 format that the next one in the chain does not understand. A good 
 reading of the GStreamer documentation will help to minimize errors.
 
-Matching Caps
+===Matching Caps===
 
 It is recommended that users look at the src and sink pads of the 
 elements they wish to connect, and insert caps, e.g. " ! 
@@ -93,4 +139,4 @@ video/x-raw-yuv,format=(fourcc)I420" between them, to make sure the
 upstream element in the chain is sending out a format that the 
 receiving elements are compatible with. When there are no matching 
 caps, then some other conversion element, such as "ffmpegcolorspace" 
-would be necessary to supply the matching caps.
+should be inserted between them, to supply the matching caps.

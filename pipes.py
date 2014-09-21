@@ -11,10 +11,10 @@ data = (('iRadio with 10-band EQ',
          'v4l2src\n'
          ' ! autovideoconvert\n'
          ' ! autovideosink'),
-        ('Webcam HD recorder 30fps',
+        ('Webcam HD recorder',
          'matroskamux name=mux ! filesink location=/tmp/cam.mkv \n'
          'v4l2src num-buffers=300 \n'
-         ' ! image/jpeg,framerate=30/1 \n'
+         ' ! image/jpeg \n'
          ' ! tee name=pq ! queue ! jpegparse ! mux.video_0 \n'
          'autoaudiosrc \n'
          ' ! audioconvert ! vorbisenc ! mux.audio_0 pq. ! queue leaky=1 \n'
