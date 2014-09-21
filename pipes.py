@@ -19,7 +19,9 @@ data = (('iRadio with 10-band EQ',
          'autoaudiosrc \n'
          ' ! audioconvert ! vorbisenc ! mux.audio_0 pq. ! queue leaky=1 \n'
          ' ! jpegdec ! autovideosink'),
-        ('Grab audio from video',
+        ('HD video playback',
+         'playbin2 uri=file:///tmp/cam.mkv'),
+        ('Separate audio from video',
          'filesrc location=/tmp/cam.mkv \n'
          ' ! matroskademux\n'
          ' ! vorbisdec\n'

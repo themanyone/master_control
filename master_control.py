@@ -301,14 +301,14 @@ class Master(object):
             if recording:
                 hbox = rec.parent
                 hbox.remove(rec)
-                hbox.pack_start(play)
+                hbox.pack_start(play,False)
                 hbox.reorder_child(play,0)
                 play.show()
         else:
             if not recording:
                 hbox = play.parent
                 hbox.remove(play)
-                hbox.pack_start(rec)
+                hbox.pack_start(rec,False)
                 hbox.reorder_child(rec,0)
                 rec.show()
             
@@ -442,7 +442,19 @@ class Master(object):
                     pass
                 else:
                     self.pad_window(None,None,ele)
-            elif case("_Refresh","F5"):
+            elif case("_Rewind","Ctrl+R"):
+                tf = gst.Format(gst.FORMAT_TIME)
+                d = self.pipeline.query_position(tf, None)[0]
+                nt = d-50000000000
+                self.pipeline.seek_simple(gst.FORMAT_TIME, gst.SEEK_FLAG_FLUSH | gst.SEEK_FLAG_KEY_UNIT, nt)
+            elif case("Re_start","Shift+Ctrl+R"):
+                self.pipeline.seek_simple(gst.FORMAT_TIME, gst.SEEK_FLAG_FLUSH | gst.SEEK_FLAG_KEY_UNIT, 1)
+            elif case("_Fast Forward","Ctrl+F"):
+                tf = gst.Format(gst.FORMAT_TIME)
+                d = self.pipeline.query_position(tf, None)[0]
+                nt = d+50000000000
+                self.pipeline.seek_simple(gst.FORMAT_TIME, gst.SEEK_FLAG_FLUSH | gst.SEEK_FLAG_KEY_UNIT, nt)
+            elif case("R_efresh","F5"):
                 self.queue_newpipe = True
                 self.on_stop()
                 self.on_play()                
@@ -517,7 +529,10 @@ class Master(object):
                 ("_Messages","<Ctrl>M",gtk.STOCK_PROPERTIES),
                 ("_Popup Video","<Ctrl><Shift>V",gtk.STOCK_ZOOM_FIT),
                 ("Popup _Tab","<Ctrl><Shift>T",gtk.STOCK_ZOOM_FIT),
-                ("_Refresh","F5",gtk.STOCK_REFRESH),
+                ("Re_start","<Shift><Ctrl>R",gtk.STOCK_MEDIA_PREVIOUS),
+                ("_Rewind","<Ctrl>R",gtk.STOCK_MEDIA_REWIND),
+                ("_Fast Forward","<Ctrl>F",gtk.STOCK_MEDIA_FORWARD),
+                ("R_efresh","F5",gtk.STOCK_REFRESH),
                 )),
             (("_Help",gtk.STOCK_HELP),(
                 ("_Usage Help","<Ctrl>H",gtk.STOCK_HELP),
