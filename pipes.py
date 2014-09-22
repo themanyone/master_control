@@ -5,6 +5,8 @@ data = (('iRadio with 10-band EQ',
          ' ! equalizer-10bands ! autoaudiosink t. ! queue ! audioconvert \n'
          ' ! synaescope shader=2 shade-amount=4047179778 \n'
          ' ! queue ! autovideoconvert ! autovideosink'),
+        ('Play Anything (drag and drop onto player)',
+         'playbin2 uri='),
         ('play DVD (Popup video first)',
          'playbin2 uri=dvd:// flags=7'),
         ('Simple webcam viewer',

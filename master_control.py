@@ -245,7 +245,7 @@ class Master(object):
             # put pipeline selector here
             dropdown = self.dropdown = selector_widget(make_model(data))
             dropdown.connect("changed",self.change_pipeline)
-            dropdown.set_active(9)
+            dropdown.set_active(11)
             dropdown.set_size_request(245,20)
             button_box.pack_start(dropdown, False)
             vbox.pack_start(button_box,False)
@@ -292,6 +292,8 @@ class Master(object):
         buf = self.textbuf
         self.textbuf.set_text(txt)
         self.on_stop()
+        if "playbin" in txt:
+            return False
         # play button parent
         rec = self.controls[0][1]
         play = self.controls[1][1]
