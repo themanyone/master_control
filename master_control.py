@@ -107,7 +107,6 @@ class Master(object):
         else:
             if me.get_visible():
                 buf   = me.textview.get_buffer()
-                buf.begin_user_action()
                 lines = buf.get_line_count()
                 begin = buf.get_iter_at_line(lines-2)
                 end   = buf.get_iter_at_line(lines-1)
@@ -126,7 +125,6 @@ class Master(object):
         bar = obj.get_vscrollbar()
         adj = bar.get_adjustment()
         bar.set_value(adj.get_upper())
-        buf.end_user_action()
         return False # no-repeat
     def dialog_delete(self,a,b):
         a.hide()
@@ -181,11 +179,6 @@ class Master(object):
                 widget.set_sensitive(False)
             except:
                 pass
-    # def tlist_changed(self,e,lang_mgr):
-        # """ temporary language picker """
-        # lang_id = e.get_active_text()
-        # lang = lang_mgr.get_language(lang_id)
-        # self.textbuf.set_language(lang)
     def gst_notebook(self):
         """ notebook with gst tweak sliders for each element """
         try:
@@ -210,15 +203,6 @@ class Master(object):
             
             # set programming language of buffer
             lang_mgr = gtksourceview2.LanguageManager()
-            # temporary language picker
-            # tlang_ids = lang_mgr.get_language_ids()
-            # tliststore = gtk.ListStore(str, str)
-            # for x in tlang_ids:
-                # tliststore.append((x,x))
-            # tlist = selector_widget(tliststore)
-            # tlist.connect("changed", self.tlist_changed, lang_mgr)
-            # vbox.pack_start(tlist)
-            # /test
             lang_id = 'sparql'
             lang = lang_mgr.get_language(lang_id)
             self.textbuf.set_language(lang)
@@ -259,9 +243,8 @@ class Master(object):
         pipe.reverse()
         for ele in pipe:
             # for each element in the pipeline
-            # put an HBox in the notebook
+            # put an HBox panel of controls in the notebook
             tweakbox = gtk.HBox(homogeneous = False)
-            # tweakbox.set_sxize_request(-1,120)
             pads = list(ele.pads())
             padbox = gtk.VBox()
             # >>> ele = pipeline.get_by_name('mix')
@@ -276,11 +259,11 @@ class Master(object):
             props = ele.props
             for prop in props:
                 self.pack_controls(tweakbox,ele,prop)
-            # todo: get help on ele_factory_name
             ele_factory_name = ele.get_factory().get_name()
             # put element names on the tabs
             label = gtk.Label(ele.get_name())
-            label.drag_source_set(gtk.gdk.BUTTON1_MASK, [("move",0,0),], gtk.gdk.ACTION_MOVE)
+            label.drag_source_set(gtk.gdk.BUTTON1_MASK, [("move",0,0),],
+            gtk.gdk.ACTION_MOVE)
             label.drag_source_set_icon_stock(gtk.STOCK_COPY)
             notebook.append_page(tweakbox,label)
         notebook.show_all()
@@ -349,8 +332,8 @@ class Master(object):
             self.level0
         except:
             self.level0 = level_bar(-42,6)
-            box = vpack(self.bottom_area, self.level0, gtk.Label("level"), False)
-            # self.level0.set_sxize_request(-1,150)
+            box = vpack(self.bottom_area, self.level0,
+            gtk.Label("level"), False)
             self.bottom_area.reorder_child(box,0)
     def file_open(self):
         """Open a file dialog"""
@@ -447,15 +430,18 @@ class Master(object):
             elif case("_Rewind","Ctrl+R"):
                 tf = gst.Format(gst.FORMAT_TIME)
                 d = self.pipeline.query_position(tf, None)[0]
-                nt = d-50000000000
-                self.pipeline.seek_simple(gst.FORMAT_TIME, gst.SEEK_FLAG_FLUSH | gst.SEEK_FLAG_KEY_UNIT, nt)
+                nt = d - 10 * 1000000000
+                self.pipeline.seek_simple(gst.FORMAT_TIME,
+                gst.SEEK_FLAG_FLUSH | gst.SEEK_FLAG_KEY_UNIT, nt)
             elif case("Re_start","Shift+Ctrl+R"):
-                self.pipeline.seek_simple(gst.FORMAT_TIME, gst.SEEK_FLAG_FLUSH | gst.SEEK_FLAG_KEY_UNIT, 1)
+                self.pipeline.seek_simple(gst.FORMAT_TIME,
+                gst.SEEK_FLAG_FLUSH | gst.SEEK_FLAG_KEY_UNIT, 1)
             elif case("_Fast Forward","Ctrl+F"):
                 tf = gst.Format(gst.FORMAT_TIME)
                 d = self.pipeline.query_position(tf, None)[0]
-                nt = d+50000000000
-                self.pipeline.seek_simple(gst.FORMAT_TIME, gst.SEEK_FLAG_FLUSH | gst.SEEK_FLAG_KEY_UNIT, nt)
+                nt = d + 10 * 1000000000
+                self.pipeline.seek_simple(gst.FORMAT_TIME,
+                gst.SEEK_FLAG_FLUSH | gst.SEEK_FLAG_KEY_UNIT, nt)
             elif case("R_efresh","F5"):
                 self.queue_newpipe = True
                 self.on_stop()
@@ -723,12 +709,10 @@ class Master(object):
         """Populate Pad Window with controls"""
         dlg = gtk.Dialog(pad.get_name(), None,
             gtk.DIALOG_DESTROY_WITH_PARENT)
-        # clear the window
-        # dlg.vbox.foreach(lambda x:x.destroy())
         dlg.set_size_request(-1,150)
         hbox = gtk.HBox()
-        # >>> alpha = list(pad.props)[-1]
-        # >>> alpha.minimum = slider_value
+        # >>> prop = list(pad.props)[-1]
+        # >>> prop.minimum = slider_value
         for prop in list(pad.props):
             self.pack_controls(hbox,pad,prop)
         dlg.vbox.pack_start(hbox,True)
@@ -740,7 +724,7 @@ class Master(object):
         except:
             ele,prop = evt
         if 'gtk.Button' in str(type(e)):
-            # button pressed: get default value
+            # button pressed: set default value
             widget = e.parent.get_children()[0]
             value = e.default
             if hasattr(widget, 'set_value'):

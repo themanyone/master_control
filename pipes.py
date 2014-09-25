@@ -33,7 +33,7 @@ data = (('iRadio with 10-band EQ',
          'matroskamux name=mux ! filesink \n'
          'location=/tmp/cam.mkv \n'
          'v4l2src\n'
-         ' ! image/jpeg,width=640,height=480,framerate=5/1\n'
+         ' ! image/jpeg,framerate=5/1\n'
          ' ! videorate force-fps=25/1 drop-only=true\n'
          ' ! tee name=pq ! queue ! jpegparse ! mux.\n'
          ' pq. ! queue ! jpegdec ! autovideosink'),
