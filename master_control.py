@@ -3,7 +3,7 @@
 # Name: Master Control
 # Info: Master Control does it all for ultimate multimedia control.
 # Status: Pre-release
-# Version: 0.1
+# Version: 0.1.2
 
 # Copyright (C) 2014 Henry Kroll III, http://www.TheNerdShow.com
 # This program is free software: you can redistribute it and/or modify

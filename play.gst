@@ -1,0 +1,1 @@
+playbin2 vis-plugin=spectrascope flags=11 uri=
