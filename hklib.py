@@ -64,6 +64,30 @@ def make_model(data):
         m.set_value(i, 0, pair[0])
         m.set_value(i, 1, pair[1])
     return m
+def ypack(parent, control, label, expand=False, controlexpand=False, y=5):
+    """ pack up to y controls in VBox with label right """
+    if not parent:
+        try:
+            del ypack.vbox
+        except:
+            pass
+        return
+    try:
+        ypack.vbox
+    except:
+        ypack.packed = 0
+        ypack.vbox=gtk.VBox()
+        parent.pack_start(ypack.vbox, False)
+        ypack.vbox.show()
+    hbox=gtk.HBox()
+    hbox.pack_start(label, False)
+    hbox.pack_start(control, controlexpand)
+    ypack.vbox.pack_start(hbox, expand)
+    hbox.show_all()
+    ypack.packed += 1
+    if ypack.packed > y:
+        del ypack.vbox
+    return
 def vpack(parent, control, label, expand=False, controlexpand=True):
     """ pack control in VBox with label underneath """
     box=gtk.VBox()

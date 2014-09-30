@@ -2,8 +2,7 @@
 # -*- coding: utf-8 -*-
 # Name: Master Control
 # Info: Master Control does it all for ultimate multimedia control.
-# Status: Pre-release
-# Version: 0.1.2
+# Status: Alpha
 
 # Copyright (C) 2014 Henry Kroll III, http://www.TheNerdShow.com
 # This program is free software: you can redistribute it and/or modify
@@ -142,20 +141,20 @@ class Master(object):
         or 'GParamInt' in t or 'GParamDouble' in t:
             if 'GParamUInt' in t or 'GParamInt' in t:
                 digits = 0
-                adj = gtk.Adjustment(ele.get_property(prop.name),prop.minimum,prop.maximum,1,100,1000)
+                adj = gtk.Adjustment(ele.get_property(prop.name),prop.minimum,prop.maximum,1.0,0,0)
             else:
                 digits = 2
-                adj = gtk.Adjustment(ele.get_property(prop.name),prop.minimum,prop.maximum,0.1,0.1,0.10)
-            widget = self.init_slider(adj,digits)
+                adj = gtk.Adjustment(ele.get_property(prop.name),prop.minimum,prop.maximum,0.1,0,0)
+            widget = gtk.SpinButton(adj, prop.maximum / 10, digits)
             widget.set_tooltip_text(prop.blurb)
             widget.connect("value-changed", self.tweak_changed, (ele,prop.name))
-            vpack(tweakbox,widget,button, False)
+            ypack(tweakbox,widget,button, False)
         if 'gboolean'==prop.value_type.name:
             widget = gtk.CheckButton()
             widget.set_tooltip_text(prop.blurb)
             widget.connect("button-release-event", self.tweak_changed, (ele,prop.name))
             widget.set_active(ele.get_property(prop.name))
-            vpack(tweakbox,widget,button,False,False)
+            ypack(tweakbox,widget,button,False,False)
         if 'GParamEnum' in t:
             liststore = gtk.ListStore(int, str)
             for r in range(0,999):
@@ -167,13 +166,13 @@ class Master(object):
             widget.set_active(ele.get_property(prop.name))
             widget.connect("changed", self.tweak_changed, (ele,prop.name))
             widget.set_tooltip_text(prop.blurb)
-            vpack(tweakbox,widget,button,False,False)
+            ypack(tweakbox,widget,button,False,False)
         if 'GParamString' in t and prop.flags & 1:
             widget = gtk.Entry()
             widget.set_text(ele.get_property(prop.name) or "")
             widget.connect("changed", self.tweak_changed, (ele,prop.name))
             widget.set_tooltip_text(prop.blurb)
-            vpack(tweakbox,widget,button,False,False)
+            ypack(tweakbox,widget,button,False,False)
         if not prop.flags & WRITE:
             try:
                 widget.set_sensitive(False)
@@ -259,6 +258,7 @@ class Master(object):
             props = ele.props
             for prop in props:
                 self.pack_controls(tweakbox,ele,prop)
+            ypack(None,None,None,False,False,0)
             ele_factory_name = ele.get_factory().get_name()
             # put element names on the tabs
             label = gtk.Label(ele.get_name())
@@ -298,15 +298,6 @@ class Master(object):
                 rec.show()
             
         return False
-    def init_slider(self, adj, digits=0):
-        """Apply defaults to gtk.VScale slider widgets"""
-        vscale = gtk.VScale(adj)
-        vscale.set_digits(digits)
-        vscale.set_update_policy(gtk.UPDATE_CONTINUOUS)
-        vscale.set_value_pos(gtk.POS_TOP)
-        vscale.set_draw_value(True)
-        vscale.set_inverted(True)
-        return vscale
     def request_video_preview(self, imagesink):
         """Capture all video sinks; add to preview panel"""
         if not self.grab_video_windows:
