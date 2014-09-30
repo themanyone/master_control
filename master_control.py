@@ -258,7 +258,7 @@ class Master(object):
             props = ele.props
             for prop in props:
                 self.pack_controls(tweakbox,ele,prop)
-            ypack(None,None,None,False,False,0)
+            ypack(None,None,None,False,False)
             ele_factory_name = ele.get_factory().get_name()
             # put element names on the tabs
             label = gtk.Label(ele.get_name())
@@ -700,12 +700,13 @@ class Master(object):
         """Populate Pad Window with controls"""
         dlg = gtk.Dialog(pad.get_name(), None,
             gtk.DIALOG_DESTROY_WITH_PARENT)
-        dlg.set_size_request(-1,150)
+        dlg.set_size_request(-1,180)
         hbox = gtk.HBox()
         # >>> prop = list(pad.props)[-1]
         # >>> prop.minimum = slider_value
         for prop in list(pad.props):
             self.pack_controls(hbox,pad,prop)
+        ypack(None,None,None,False,False)
         dlg.vbox.pack_start(hbox,True)
         dlg.show_all()
         dlg.present()

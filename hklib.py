@@ -64,7 +64,7 @@ def make_model(data):
         m.set_value(i, 0, pair[0])
         m.set_value(i, 1, pair[1])
     return m
-def ypack(parent, control, label, expand=False, controlexpand=False, y=5):
+def ypack(parent, control, label, expand=False, controlexpand=False, y=6):
     """ pack up to y controls in VBox with label right """
     if not parent:
         try:
