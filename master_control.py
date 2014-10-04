@@ -45,9 +45,17 @@ class Master(object):
     grab_video_windows = True
     queue_newpipe = True
     
-    def __init__(self):
+    def __init__(self, argv):
+        self.args = ""
+        if len(argv) > 2:
+            self.args = " ".join(argv[1:])
+        elif len(argv) == 2:
+            if os.path.isfile(argv[1]):
+                with open(argv[1], 'r') as f:
+                    self.args=f.read()
+                
         # Change to executable's dir
-        self.path=os.path.dirname(sys.argv[0])
+        self.path = os.path.dirname(sys.argv[0])
         if self.path:
             os.chdir(self.path)
         self.init_gui()
@@ -60,8 +68,8 @@ class Master(object):
             gtk.DIALOG_DESTROY_WITH_PARENT)
         me.set_default_size(400, 200)
         me.connect("delete_event",self.dialog_delete)
-        me.textview=gtk.TextView()
-        me.scrollbox=gtk.ScrolledWindow(gtk.Adjustment(0,0,400,1,10,10))
+        me.textview = gtk.TextView()
+        me.scrollbox = gtk.ScrolledWindow(gtk.Adjustment(0,0,400,1,10,10))
         me.scrollbox.set_policy(gtk.POLICY_AUTOMATIC,gtk.POLICY_AUTOMATIC)
         me.scrollbox.add_with_viewport(me.textview)
         me.vbox.pack_start(me.scrollbox)
@@ -145,9 +153,17 @@ class Master(object):
             else:
                 digits = 2
                 adj = gtk.Adjustment(ele.get_property(prop.name),prop.minimum,prop.maximum,0.1,0,0)
-            widget = gtk.SpinButton(adj, prop.maximum / 10, digits)
+            if 'color' in t and prop.maximum > 0xffff00:
+                c = ele.get_property(prop.name)
+                r = (c & 0xff0000) >> 8
+                g = (c<<8 & 0xff0000) >> 8
+                b = (c<<16 & 0xff0000) >> 8
+                widget = gtk.ColorButton(gtk.gdk.Color(r,g,b))
+                widget.connect("color-set", self.tweak_changed, (ele,prop.name))
+            else:
+                widget = gtk.SpinButton(adj, prop.maximum / 10, digits)
+                widget.connect("value-changed", self.tweak_changed, (ele,prop.name))
             widget.set_tooltip_text(prop.blurb)
-            widget.connect("value-changed", self.tweak_changed, (ele,prop.name))
             ypack(tweakbox,widget,button, False)
         if 'gboolean'==prop.value_type.name:
             widget = gtk.CheckButton()
@@ -228,7 +244,13 @@ class Master(object):
             # put pipeline selector here
             dropdown = self.dropdown = selector_widget(make_model(data))
             dropdown.connect("changed",self.change_pipeline)
-            dropdown.set_active(11)
+            if self.args:
+                self.textbuf.set_text(self.args)
+                self.pipetext = self.args
+                self.queue_newpipe = True
+                self.on_play()
+            else:
+                dropdown.set_active(11)
             dropdown.set_size_request(245,20)
             button_box.pack_start(dropdown, False)
             vbox.pack_start(button_box,False)
@@ -273,7 +295,7 @@ class Master(object):
     def change_pipeline(self, combobox, user_param1=None):
         txt = combobox.get_model()[combobox.get_active()][1]
         buf = self.textbuf
-        self.textbuf.set_text(txt)
+        buf.set_text(txt)
         self.on_stop()
         if "playbin" in txt:
             return False
@@ -715,9 +737,16 @@ class Master(object):
             ele,prop = p
         except:
             ele,prop = evt
-        if 'gtk.Button' in str(type(e)):
+        if 'gtk.ColorButton' in str(type(e)):
+            c = e.get_color()
+            value = (c.red & 0xff00)<<8\
+            | (c.green & 0xff00)\
+            | (c.blue & 0xff00)>>8
+        elif 'gtk.Button' in str(type(e)):
             # button pressed: set default value
             widget = e.parent.get_children()[0]
+            if widget == e:
+                widget = e.parent.get_children()[1]
             value = e.default
             if hasattr(widget, 'set_value'):
                 widget.set_value(value)
@@ -744,5 +773,5 @@ class Master(object):
             pass
         gtk.main_quit()
 if __name__ == "__main__":
-    app = Master()
+    app = Master(sys.argv)
     gtk.main()

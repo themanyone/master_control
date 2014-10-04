@@ -80,8 +80,8 @@ def ypack(parent, control, label, expand=False, controlexpand=False, y=6):
         parent.pack_start(ypack.vbox, False)
         ypack.vbox.show()
     hbox=gtk.HBox()
+    hbox.pack_end(control, controlexpand)
     hbox.pack_start(label, False)
-    hbox.pack_start(control, controlexpand)
     ypack.vbox.pack_start(hbox, expand)
     hbox.show_all()
     ypack.packed += 1
