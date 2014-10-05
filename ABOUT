@@ -1,7 +1,7 @@
 # Name: Master Control
 # Info: Edit Gstreamer pipelines and adjust individual elements
 # Status: Alpha
-# Version: 0.1.3
+# Version: 0.1.4
 
 # Copyright (C) 2014 Henry Kroll III, http://www.TheNerdShow.com
 # This program is free software: you can redistribute it and/or modify
