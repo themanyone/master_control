@@ -161,10 +161,17 @@ class Master(object):
                 widget = gtk.ColorButton(gtk.gdk.Color(r,g,b))
                 widget.connect("color-set", self.tweak_changed, (ele,prop.name))
             else:
-                widget = gtk.SpinButton(adj, prop.maximum / 10, digits)
+                if 'GParamDouble' in t:
+                    widget = self.init_slider(adj,digits)
+                else:
+                    widget = gtk.SpinButton(adj, prop.maximum / 10, digits)
                 widget.connect("value-changed", self.tweak_changed, (ele,prop.name))
             widget.set_tooltip_text(prop.blurb)
-            ypack(tweakbox,widget,button, False)
+            if 'GParamDouble' in t:
+                vpack(tweakbox,widget,button, False)
+                ypack(None,widget,button)
+            else:
+                ypack(tweakbox,widget,button, False)
         if 'gboolean'==prop.value_type.name:
             widget = gtk.CheckButton()
             widget.set_tooltip_text(prop.blurb)
@@ -320,6 +327,15 @@ class Master(object):
                 rec.show()
             
         return False
+    def init_slider(self, adj, digits=0):
+        """Apply defaults to gtk.VScale slider widgets"""
+        vscale = gtk.VScale(adj)
+        vscale.set_digits(digits)
+        vscale.set_update_policy(gtk.UPDATE_CONTINUOUS)
+        vscale.set_value_pos(gtk.POS_TOP)
+        vscale.set_draw_value(True)
+        vscale.set_inverted(True)
+        return vscale
     def request_video_preview(self, imagesink):
         """Capture all video sinks; add to preview panel"""
         if not self.grab_video_windows:
