@@ -474,7 +474,7 @@ class Master(object):
             elif case("R_efresh","F5"):
                 self.queue_newpipe = True
                 self.on_stop()
-                self.on_play()                
+                self.on_play()
             elif case("_Usage Help","Ctrl+H"):
                 self.on_help("README")
             elif case("_Inspect Selected","Ctrl+I"):
@@ -679,9 +679,15 @@ class Master(object):
     def on_stop(self, button=None):
         """Stop"""
         try:
-            self.pipeline.set_state(gst.STATE_READY)
-        except:
+            self.pipeline.set_state(gst.STATE_PAUSED)
+            self.pipeline.seek_simple(gst.FORMAT_TIME,
+            gst.SEEK_FLAG_FLUSH | gst.SEEK_FLAG_KEY_UNIT, 1)
+        except AttributeError:
             pass
+        # try:
+            # self.pipeline.set_state(gst.STATE_READY)
+        # except:
+            # pass
     def on_help(self, file):
         """Show Help Dialog"""
         ts = gtk.gdk.CURRENT_TIME
