@@ -27,7 +27,7 @@ import gobject
 gobject.threads_init()
 import gst
 import subprocess
-import os, sys, codecs
+import os, sys, codecs, re
 from level import *
 from hklib import *
 from pipes import *
@@ -107,27 +107,24 @@ class Master(object):
         me.hide()
     def show_msg(self, obj):
         msg = str(obj)+'\n'
-        try:
-            me = self.msg_dialog
-        except:
-            pass
-        else:
-            if me.get_visible():
-                buf   = me.textview.get_buffer()
-                lines = buf.get_line_count()
-                begin = buf.get_iter_at_line(lines-2)
-                end   = buf.get_iter_at_line(lines-1)
-                txt   = buf.get_text(begin, end)
-                if txt != msg:
-                    buf.insert_at_cursor(str(msg))
-                # delete first line when buf gets too long
-                if lines > 100:
-                    start = buf.get_start_iter()
-                    finish = buf.get_iter_at_line(1)
-                    buf.delete(start,finish)
-                # move that scrollbar down
-                obj = me.scrollbox
-                gtk.idle_add(self.scroll_down,buf,obj)
+        me = self.msg_dialog
+
+        if me.get_visible():
+            buf   = me.textview.get_buffer()
+            lines = buf.get_line_count()
+            begin = buf.get_iter_at_line(lines-2)
+            end   = buf.get_iter_at_line(lines-1)
+            txt   = buf.get_text(begin, end)
+            if txt != msg:
+                buf.insert_at_cursor(str(msg))
+            # delete first line when buf gets too long
+            if lines > 100:
+                start = buf.get_start_iter()
+                finish = buf.get_iter_at_line(1)
+                buf.delete(start,finish)
+            # move that scrollbar down
+            obj = me.scrollbox
+            gtk.idle_add(self.scroll_down,buf,obj)
     def scroll_down(self, buf, obj):
         bar = obj.get_vscrollbar()
         adj = bar.get_adjustment()
@@ -149,7 +146,10 @@ class Master(object):
         or 'GParamInt' in t or 'GParamDouble' in t:
             if 'GParamUInt' in t or 'GParamInt' in t:
                 digits = 0
-                adj = gtk.Adjustment(ele.get_property(prop.name),prop.minimum,prop.maximum,1.0,0,0)
+                try:
+                    adj = gtk.Adjustment(ele.get_property(prop.name),prop.minimum,prop.maximum,1.0,0,0)
+                except TypeError: # xpad is not readable
+                    adj = gtk.Adjustment(0.0,prop.minimum,prop.maximum,1.0,0,0)
             else:
                 digits = 2
                 adj = gtk.Adjustment(ele.get_property(prop.name),prop.minimum,prop.maximum,0.1,0,0)
@@ -176,7 +176,10 @@ class Master(object):
             widget = gtk.CheckButton()
             widget.set_tooltip_text(prop.blurb)
             widget.connect("button-release-event", self.tweak_changed, (ele,prop.name))
-            widget.set_active(ele.get_property(prop.name))
+            try:
+                widget.set_active(ele.get_property(prop.name))
+            except TypeError:
+                pass
             ypack(tweakbox,widget,button,False,False)
         if 'GParamEnum' in t:
             liststore = gtk.ListStore(int, str)
@@ -343,7 +346,7 @@ class Master(object):
         # add one if it doesn't exist
         try:
             self.movie_window.window.xid
-        except:
+        except AttributeError:
             self.movie_window = gtk.DrawingArea()
             self.movie_window.show()
             self.movie_window.set_size_request(320,200)
@@ -375,6 +378,8 @@ class Master(object):
                 self.textbuf.set_text(f.read())
                 self.window.set_title(appname 
                 + " | " + os.path.basename(self.open_filename))
+        self.queue_newpipe = True
+        self.on_play()
     def file_save(self):
         """Save text buffer to disk"""
         if not self.open_filename:
@@ -456,16 +461,22 @@ class Master(object):
                     pass
                 else:
                     self.pad_window(None,None,ele)
-            elif case("_Rewind","Ctrl+R"):
+            elif case("P_ause","Ctrl+space"):
+                self.on_pause()
+            elif case("P_lay/Rec","Ctrl+Return"):
+                self.on_play()
+            elif case("_Rewind","Ctrl+Left"):
                 tf = gst.Format(gst.FORMAT_TIME)
                 d = self.pipeline.query_position(tf, None)[0]
                 nt = d - 10 * 1000000000
+                if nt < 1:
+                    nt = 1
                 self.pipeline.seek_simple(gst.FORMAT_TIME,
                 gst.SEEK_FLAG_FLUSH | gst.SEEK_FLAG_KEY_UNIT, nt)
-            elif case("Re_start","Shift+Ctrl+R"):
+            elif case("Re_start","Ctrl+R"):
                 self.pipeline.seek_simple(gst.FORMAT_TIME,
                 gst.SEEK_FLAG_FLUSH | gst.SEEK_FLAG_KEY_UNIT, 1)
-            elif case("_Fast Forward","Ctrl+F"):
+            elif case("_Fast Forward","Ctrl+Right"):
                 tf = gst.Format(gst.FORMAT_TIME)
                 d = self.pipeline.query_position(tf, None)[0]
                 nt = d + 10 * 1000000000
@@ -473,7 +484,6 @@ class Master(object):
                 gst.SEEK_FLAG_FLUSH | gst.SEEK_FLAG_KEY_UNIT, nt)
             elif case("R_efresh","F5"):
                 self.queue_newpipe = True
-                self.on_stop()
                 self.on_play()
             elif case("_Usage Help","Ctrl+H"):
                 self.on_help("README")
@@ -546,9 +556,11 @@ class Master(object):
                 ("_Messages","<Ctrl>M",gtk.STOCK_PROPERTIES),
                 ("_Popup Video","<Ctrl><Shift>V",gtk.STOCK_ZOOM_FIT),
                 ("Popup _Tab","<Ctrl><Shift>T",gtk.STOCK_ZOOM_FIT),
-                ("Re_start","<Shift><Ctrl>R",gtk.STOCK_MEDIA_PREVIOUS),
-                ("_Rewind","<Ctrl>R",gtk.STOCK_MEDIA_REWIND),
-                ("_Fast Forward","<Ctrl>F",gtk.STOCK_MEDIA_FORWARD),
+                ("P_lay/Rec","<Ctrl>Return",gtk.STOCK_MEDIA_PLAY),
+                ("P_ause","<Ctrl>space",gtk.STOCK_MEDIA_PAUSE),
+                ("Re_start","<Ctrl>R",gtk.STOCK_MEDIA_PREVIOUS),
+                ("_Rewind","<Ctrl>Left",gtk.STOCK_MEDIA_REWIND),
+                ("_Fast Forward","<Ctrl>Right",gtk.STOCK_MEDIA_FORWARD),
                 ("R_efresh","F5",gtk.STOCK_REFRESH),
                 )),
             (("_Help",gtk.STOCK_HELP),(
@@ -605,7 +617,7 @@ class Master(object):
             self.pipetext = self.textbuf.get_property("text")
             try:
                 self.pipeline
-            except:
+            except AttributeError:
                 pass
             else:
                 # todo: dispose any other references
@@ -648,10 +660,30 @@ class Master(object):
             gtk.idle_add(self.gst_notebook)
         try:
             self.pipeline.set_state(gst.STATE_PLAYING)
-        except:
+        except AttributeError:
             pass
         return False # Return False or this will repeat
     def new_pipe(self):
+        # process proprietary prop=[element, msg] specifications
+        self.props=[]
+        stmt = re.compile("[^ ]+=\[[^\]]+\]")
+        valr = re.compile("[^ ]+")
+        p = self.pipetext
+        statements = stmt.findall(p)
+        try:
+            for x in statements:
+                namepos = p.rindex('name=',0,p.index(x)) + 5
+                name = valr.match(p, namepos).group(0)
+                prop, vars = x.split('=')
+                pad = ''
+                if '::' in prop:
+                    pad, prop = prop.split("::")
+                msgname, test, val, var, math = vars[1:-1].split(",")
+                self.props.append([name, prop, pad, msgname, test, val, var, math])
+        except ValueError:
+            print("name= clause not found, required for [element,msg] assignment.")
+        for x in statements:
+            self.pipetext = self.pipetext.replace(x,'')
         try:
             self.pipeline = gst.parse_launch(self.pipetext)
         # creative error message on fail
@@ -684,10 +716,6 @@ class Master(object):
             gst.SEEK_FLAG_FLUSH | gst.SEEK_FLAG_KEY_UNIT, 1)
         except AttributeError:
             pass
-        # try:
-            # self.pipeline.set_state(gst.STATE_READY)
-        # except:
-            # pass
     def on_help(self, file):
         """Show Help Dialog"""
         ts = gtk.gdk.CURRENT_TIME
@@ -718,7 +746,6 @@ class Master(object):
         """Receive element messages from the bus."""
         if msg.structure is None:
             if msg.type == gst.MESSAGE_EOS:
-                self.show_msg("EOS received. Stopping.")
                 self.on_stop()
             return
         msgname = msg.structure.get_name()
@@ -732,9 +759,24 @@ class Master(object):
                 try:
                     lvl = msg.structure['peak'][0]
                     self.level0.set_value(lvl)
-                except:
+                except AttributeError:
                     self.request_level_control()
             gtk.idle_add(self.show_msg,msg)
+        # self.props [name, prop, pad, =msgname, obj,num, var, math]
+            for x in self.props:
+                obj,num,var,math = x[4:]
+                if msgname==x[3] and str(msg.structure[obj])==num:
+                    val = msg.structure[var]
+                    val = eval("val"+math)
+                    ele = self.pipeline.get_by_name(x[0])
+                    name, prop, pad = x[:3]
+                    if pad:
+                        pads = list(ele.pads())
+                        for p in pads:
+                            if p.get_name() == pad:
+                                p.set_property(prop, val)
+                    else:
+                        ele.set_property(prop, val)
         elif msg.type == gst.MESSAGE_STATE_CHANGED:
             old, new, pending = msg.parse_state_changed()
             self.update_play_buttons(new)
