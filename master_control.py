@@ -47,6 +47,7 @@ class Master(object):
     
     def __init__(self, argv):
         self.args = ""
+        self.loop = False
         if len(argv) > 2:
             self.args = " ".join(argv[1:])
         elif len(argv) == 2:
@@ -302,10 +303,11 @@ class Master(object):
         self.notebook = notebook
         self.notebook.connect("switch-page",self.on_page_turned)
         return False
-    def change_pipeline(self, combobox, user_param1=None):
-        txt = combobox.get_model()[combobox.get_active()][1]
-        buf = self.textbuf
-        buf.set_text(txt)
+    def change_pipeline(self, combobox, txt=None):
+        if combobox:
+            txt = combobox.get_model()[combobox.get_active()][1]
+            buf = self.textbuf
+            buf.set_text(txt)
         self.on_stop()
         if "playbin" in txt:
             return False
@@ -375,11 +377,12 @@ class Master(object):
             self.open_filename = self.file_chooser.get_filename()
             with codecs.open(self.open_filename,
             encoding = 'utf-8', mode = 'r') as f:
-                self.textbuf.set_text(f.read())
+                txt = f.read()
+                self.textbuf.set_text(txt)
                 self.window.set_title(appname 
                 + " | " + os.path.basename(self.open_filename))
         self.queue_newpipe = True
-        self.on_play()
+        self.change_pipeline(False, txt)
     def file_save(self):
         """Save text buffer to disk"""
         if not self.open_filename:
@@ -463,6 +466,8 @@ class Master(object):
                     self.pad_window(None,None,ele)
             elif case("P_ause","Ctrl+space"):
                 self.on_pause()
+            elif case("L_oop","<Ctrl>L"):
+                self.loop = not self.loop
             elif case("P_lay/Rec","Ctrl+Return"):
                 self.on_play()
             elif case("_Rewind","Ctrl+Left"):
@@ -556,6 +561,7 @@ class Master(object):
                 ("_Messages","<Ctrl>M",gtk.STOCK_PROPERTIES),
                 ("_Popup Video","<Ctrl><Shift>V",gtk.STOCK_ZOOM_FIT),
                 ("Popup _Tab","<Ctrl><Shift>T",gtk.STOCK_ZOOM_FIT),
+                ("L_oop","<Ctrl>L",gtk.STOCK_REDO),
                 ("P_lay/Rec","<Ctrl>Return",gtk.STOCK_MEDIA_PLAY),
                 ("P_ause","<Ctrl>space",gtk.STOCK_MEDIA_PAUSE),
                 ("Re_start","<Ctrl>R",gtk.STOCK_MEDIA_PREVIOUS),
@@ -714,6 +720,8 @@ class Master(object):
             self.pipeline.set_state(gst.STATE_PAUSED)
             self.pipeline.seek_simple(gst.FORMAT_TIME,
             gst.SEEK_FLAG_FLUSH | gst.SEEK_FLAG_KEY_UNIT, 1)
+            if self.loop and not button:
+                self.on_play()
         except AttributeError:
             pass
     def on_help(self, file):
