@@ -59,6 +59,7 @@ class Master(object):
         self.path = os.path.dirname(sys.argv[0])
         if self.path:
             os.chdir(self.path)
+
         self.init_gui()
         self.init_msg_dialog()
         self.init_err_dialog()
@@ -534,7 +535,8 @@ class Master(object):
         """ Initialize the GUI components """
         self.window = gtk.Window()
         self.window.set_title(appname)
-        # self.window.sxet_default_size(320, -1)
+        self.icon = gtk.gdk.pixbuf_new_from_file(appname+".png")
+        self.window.set_icon(self.icon)
         self.window.connect("delete-event", self.main_quit)
         self.top_area = gtk.ScrolledWindow(gtk.Adjustment(0,0,400,1,1,1))
         self.top_area.set_placement(gtk.CORNER_BOTTOM_LEFT)
