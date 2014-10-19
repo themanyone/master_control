@@ -137,8 +137,7 @@ the first stanza in the editor to "v4l2src brightness=200".
 
 Press the F5 key to stop, and re-start (refresh) the stream. This is 
 the same as pressing the Stop and Play buttons. The interface needs 
-some help. Right now the fast-forward and rewind buttons may be found 
-under the `View` menu.
+some help. Right now the fast-forward, loop, and rewind buttons may be found under the `Go` menu.
 
 ==Use Tabs==
 

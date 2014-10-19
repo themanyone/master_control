@@ -466,6 +466,8 @@ class Master(object):
                     self.pad_window(None,None,ele)
             elif case("P_ause","Ctrl+space"):
                 self.on_pause()
+            elif case("_Stop","Escape"):
+                self.on_stop(menuitem)
             elif case("L_oop","<Ctrl>L"):
                 self.loop = not self.loop
             elif case("P_lay/Rec","Ctrl+Return"):
@@ -557,17 +559,20 @@ class Master(object):
                 ("_Copy","<Ctrl>C",gtk.STOCK_COPY),
                 ("_Paste","<Ctrl>V",gtk.STOCK_PASTE),
                 )),
+            (("_Go",gtk.STOCK_DND),(
+                ("P_lay/Rec","<Ctrl>Return",gtk.STOCK_MEDIA_PLAY),
+                ("P_ause","<Ctrl>space",gtk.STOCK_MEDIA_PAUSE),
+                ("_Stop","Escape",gtk.STOCK_MEDIA_STOP),
+                ("Re_start","<Ctrl>R",gtk.STOCK_MEDIA_PREVIOUS),
+                ("_Rewind","<Ctrl>Left",gtk.STOCK_MEDIA_REWIND),
+                ("_Fast Forward","<Ctrl>Right",gtk.STOCK_MEDIA_FORWARD),
+                ("L_oop","<Ctrl>L",gtk.STOCK_REDO),
+                ("R_efresh","F5",gtk.STOCK_REFRESH),
+                )),
             (("_View",gtk.STOCK_DND),(
                 ("_Messages","<Ctrl>M",gtk.STOCK_PROPERTIES),
                 ("_Popup Video","<Ctrl><Shift>V",gtk.STOCK_ZOOM_FIT),
                 ("Popup _Tab","<Ctrl><Shift>T",gtk.STOCK_ZOOM_FIT),
-                ("L_oop","<Ctrl>L",gtk.STOCK_REDO),
-                ("P_lay/Rec","<Ctrl>Return",gtk.STOCK_MEDIA_PLAY),
-                ("P_ause","<Ctrl>space",gtk.STOCK_MEDIA_PAUSE),
-                ("Re_start","<Ctrl>R",gtk.STOCK_MEDIA_PREVIOUS),
-                ("_Rewind","<Ctrl>Left",gtk.STOCK_MEDIA_REWIND),
-                ("_Fast Forward","<Ctrl>Right",gtk.STOCK_MEDIA_FORWARD),
-                ("R_efresh","F5",gtk.STOCK_REFRESH),
                 )),
             (("_Help",gtk.STOCK_HELP),(
                 ("_Usage Help","<Ctrl>H",gtk.STOCK_HELP),
