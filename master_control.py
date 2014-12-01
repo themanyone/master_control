@@ -382,8 +382,8 @@ class Master(object):
                 self.textbuf.set_text(txt)
                 self.window.set_title(appname 
                 + " | " + os.path.basename(self.open_filename))
-        self.queue_newpipe = True
-        self.change_pipeline(False, txt)
+            self.queue_newpipe = True
+            self.change_pipeline(False, txt)
     def file_save(self):
         """Save text buffer to disk"""
         if not self.open_filename:
@@ -723,12 +723,16 @@ class Master(object):
         self.pipeline.set_state(gst.STATE_PAUSED)
     def on_stop(self, button=None):
         """Stop"""
+        recording = self.controls[0][1].parent
         try:
-            self.pipeline.set_state(gst.STATE_PAUSED)
-            self.pipeline.seek_simple(gst.FORMAT_TIME,
-            gst.SEEK_FLAG_FLUSH | gst.SEEK_FLAG_KEY_UNIT, 1)
-            if self.loop and not button:
-                self.on_play()
+            if recording:
+                self.pipeline.set_state(gst.STATE_READY)
+            else:
+                self.pipeline.set_state(gst.STATE_PAUSED)
+                self.pipeline.seek_simple(gst.FORMAT_TIME,
+                gst.SEEK_FLAG_FLUSH | gst.SEEK_FLAG_KEY_UNIT, 1)
+                if self.loop and not button:
+                    self.on_play()
         except AttributeError:
             pass
     def on_help(self, file):
