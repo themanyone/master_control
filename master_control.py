@@ -57,6 +57,7 @@ class Master(object):
                 
         # Change to executable's dir
         self.path = os.path.dirname(sys.argv[0])
+        print self.path
         if self.path:
             os.chdir(self.path)
 
@@ -293,7 +294,10 @@ class Master(object):
             for prop in props:
                 self.pack_controls(tweakbox,ele,prop)
             ypack(None,None,None,False,False)
-            ele_factory_name = ele.get_factory().get_name()
+            try:
+                ele_factory_name = ele.get_factory().get_name()
+            except AttributeError:
+                pass
             # put element names on the tabs
             label = gtk.Label(ele.get_name())
             label.drag_source_set(gtk.gdk.BUTTON1_MASK, [("move",0,0),],
@@ -310,20 +314,20 @@ class Master(object):
             buf = self.textbuf
             buf.set_text(txt)
         self.on_stop()
-        if "playbin" in txt:
-            return False
         # play button parent
         rec = self.controls[0][1]
         play = self.controls[1][1]
         recording = rec.parent
         if "filesink" not in txt:
-            self.on_play()
             if recording:
                 hbox = rec.parent
                 hbox.remove(rec)
                 hbox.pack_start(play,False)
                 hbox.reorder_child(play,0)
                 play.show()
+            if "playbin" in txt:
+                return False
+            self.on_play()
         else:
             if not recording:
                 hbox = play.parent
@@ -351,9 +355,9 @@ class Master(object):
             self.movie_window.window.xid
         except AttributeError:
             self.movie_window = gtk.DrawingArea()
-            self.movie_window.show()
             self.movie_window.set_size_request(320,200)
             self.bottom_area.pack_start(self.movie_window,False)
+            self.movie_window.show()
         else:
             # if it does exist, attach it
             if not imagesink.got_xwindow_id(self.movie_window.window.xid):
@@ -727,6 +731,7 @@ class Master(object):
         try:
             if recording:
                 self.pipeline.set_state(gst.STATE_READY)
+                self.queue_newpipe = True
             else:
                 self.pipeline.set_state(gst.STATE_PAUSED)
                 self.pipeline.seek_simple(gst.FORMAT_TIME,
