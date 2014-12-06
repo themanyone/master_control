@@ -57,7 +57,6 @@ class Master(object):
                 
         # Change to executable's dir
         self.path = os.path.dirname(sys.argv[0])
-        print self.path
         if self.path:
             os.chdir(self.path)
 
@@ -191,7 +190,7 @@ class Master(object):
                     liststore.append((int(r), prop.enum_class(r).value_name))
                 except:
                     break
-            widget = selector_widget(liststore, button.default, 2)
+            widget = selector_widget(liststore, 2)
             widget.set_active(ele.get_property(prop.name))
             widget.connect("changed", self.tweak_changed, (ele,prop.name))
             widget.set_tooltip_text(prop.blurb)
@@ -255,7 +254,7 @@ class Master(object):
             self.controls[0][1].connect("clicked",self.on_play)
             setattr(self,self.controls[0][0],self.controls[0][1])
             # put pipeline selector here
-            dropdown = self.dropdown = selector_widget(make_model(data))
+            dropdown = self.dropdown = selector_widget(make_model(data, 1), 2, 1)
             dropdown.connect("changed",self.change_pipeline)
             if self.args:
                 self.textbuf.set_text(self.args)
@@ -263,7 +262,7 @@ class Master(object):
                 self.queue_newpipe = True
                 self.on_play()
             else:
-                dropdown.set_active(11)
+                dropdown.set_active(10)
             dropdown.set_size_request(245,20)
             button_box.pack_start(dropdown, False)
             vbox.pack_start(button_box,False)
@@ -310,7 +309,7 @@ class Master(object):
         return False
     def change_pipeline(self, combobox, txt=None):
         if combobox:
-            txt = combobox.get_model()[combobox.get_active()][1]
+            txt = combobox.get_model()[combobox.get_active()][-1]
             buf = self.textbuf
             buf.set_text(txt)
         self.on_stop()

@@ -48,21 +48,35 @@ class switch(object):
             return True
         else:
             return False    
-def selector_widget(liststore, active=0, cols=1):
+def selector_widget(liststore, cols=1, icon=0):
     widget=gtk.ComboBox(liststore)
-    for x in range(0, cols):
+    if icon==1:
+        cell = gtk.CellRendererPixbuf()
+        widget.pack_start(cell, False)
+        widget.add_attribute(cell, 'pixbuf', 0)
+    for x in range(icon, cols):
         cell = gtk.CellRendererText()
         widget.pack_start(cell, True)
         widget.add_attribute(cell, 'text', x)
-    if active:
-        cell = gtk.CellRendererText()
     return widget
-def make_model(data):
-    m = gtk.ListStore(str, str)
+def make_model(data, icon=0):
+    if icon==1:
+        m = gtk.ListStore(gtk.gdk.Pixbuf, str, str)
+    else:
+        m = gtk.ListStore(str, str)
     for pair in data:
         i = m.append()
-        m.set_value(i, 0, pair[0])
-        m.set_value(i, 1, pair[1])
+        m.set_value(i, icon, pair[0])
+        m.set_value(i, icon+1, pair[1])
+        if icon==1:
+            gw = gtk.Image()
+            try:
+                pair[2]
+            except IndexError:
+                pb = gw.render_icon(gtk.STOCK_OK, gtk.ICON_SIZE_MENU)
+            else:
+                pb = gw.render_icon(pair[2], gtk.ICON_SIZE_MENU)
+            m.set_value(i, 0, pb)
     return m
 def ypack(parent, control, label, expand=False, controlexpand=False, y=6):
     """ pack up to y controls in VBox with label right """
