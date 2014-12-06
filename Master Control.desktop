@@ -1,0 +1,19 @@
+[Desktop Entry]
+Encoding=UTF-8
+Version=1.0
+Name=Master Control
+Name[es]=Control Maestro
+Name[fr]=commande maître
+Name[ru]=главное управление
+Comment=Edit multimedia pipelines
+Comment[es]=Tuberías Editar multimedia
+Comment[fr]=Modifier pipelines multimédia
+Comment[ru]=Редактирования мультимедиа трубопроводов
+GenericName=Multimedia Editor
+Type=Application
+Exec=mc %F
+Terminal=false
+StartupNotify=true
+Categories=TextEditor;GNOME;GTK;AudioVideo;Video;AudioVideoEditing;
+MimeType=text/plain;
+Icon=Master Control.png
