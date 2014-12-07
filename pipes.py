@@ -61,10 +61,12 @@ data = (('iRadio with 10-band EQ',
          ' ! webmmux name=mux\n'
          ' ! filesink location="/tmp/out.webm"\n'
          't. ! queue ! autovideosink\n'
-         'autoaudiosrc ! level ! audioconvert ! vorbisenc\n'
+         'alsasrc latency-time=100000\n'
+         ' ! level ! audioconvert ! vorbisenc\n'
          ' ! mux.audio_0', gtk.STOCK_MEDIA_RECORD),
         ('Audio recorder, noise gate',
-         'autoaudiosrc ! ladspa-gate\n'
+         'alsasrc latency-time=100000\n'
+         ' ! ladspa-gate\n'
          'Threshold=-28.0 Decay=2.0 Hold=2.0 Attack=0.1\n'
          ' ! tee name=t ! autoaudiosink t. ! lame ! filesink location=/tmp/out.mp3',gtk.STOCK_MEDIA_RECORD),
         ('Image slideshow',
@@ -77,12 +79,12 @@ data = (('iRadio with 10-band EQ',
          ' ! ffmpegcolorspace\n'
          ' ! autovideosink', gtk.STOCK_YES),
         ('Live voice changer',
-         'autoaudiosrc\n'
+         'alsasrc latency-time=100000\n'
          ' ! ladspa-tap-pitch name=pitch\n'
          'Wet-Level--dB-=20 Dry-Level--dB-=10 Semitone-Shift=-5\n'
          ' ! autoaudiosink', gtk.STOCK_PREFERENCES),
         ('Voice change chorus with spectrascope',
-         'autoaudiosrc\n'
+         'alsasrc latency-time=100000\n'
          ' ! ladspa-tap-pitch name=pitch\n'
          'Wet-Level--dB-=20 Dry-Level--dB-=20 Semitone-Shift=12\n'
          ' ! tee name=t ! level ! queue ! audioconvert\n'
@@ -90,7 +92,7 @@ data = (('iRadio with 10-band EQ',
          ' ! spectrascope shader=5 shade-amount=36709122 name=scope\n'
          ' ! queue ! autovideoconvert ! autovideosink name=vsink', gtk.STOCK_PREFERENCES),
         ('Sound level meter, oscilliscope',
-         'autoaudiosrc\n'
+         'alsasrc latency-time=100000\n'
          ' ! level ! wavescope shader=0 ! autovideoconvert ! xvimagesink', gtk.STOCK_PREFERENCES),
         ('Reencode Vorbis to mulaw, play',
          'filesrc location=/tmp/cooldance.ogg\n'
