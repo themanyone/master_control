@@ -42,13 +42,7 @@ data = (('iRadio with 10-band EQ',
          ' ! vorbisenc ! mux.audio_0 pq. ! queue leaky=1\n'
          ' ! xvimagesink sync=false', gtk.STOCK_MEDIA_RECORD),
         ('HD video playback',
-         'playbin2 uri=file:///tmp/cam.mkv', gtk.STOCK_YES),
-        ('Separate audio from video',
-         'filesrc location=/tmp/cam.mkv\n'
-         ' ! matroskademux\n'
-         ' ! vorbisdec\n'
-         ' ! wavenc\n'
-         ' ! filesink location=/tmp/cam.wav', gtk.STOCK_SAVE_AS),
+         'playbin2 uri=file:///tmp/cam.mkv', gtk.STOCK_MEDIA_PLAY),
         ('Webcam Timelapse 5 to 25fps',
          'matroskamux name=mux ! filesink\n'
          'location=/tmp/cam.mkv\n'
@@ -57,6 +51,31 @@ data = (('iRadio with 10-band EQ',
          ' ! videorate force-fps=25/1 drop-only=true\n'
          ' ! tee name=pq ! queue ! jpegparse ! mux.\n'
          ' pq. ! queue ! jpegdec ! autovideosink', gtk.STOCK_MEDIA_RECORD),
+        ('Desktop screen recorder to vp8 webm',
+         'ximagesrc use-damage=0\n'
+         ' ! video/x-raw-rgb,framerate=15/1\n'
+         ' ! ffmpegcolorspace\n'
+         ' ! video/x-raw-yuv,format=(fourcc)I420\n'
+         ' ! tee name=t\n'
+         ' ! vp8enc speed=5\n'
+         ' ! webmmux name=mux\n'
+         ' ! filesink location="/tmp/out.webm"\n'
+         't. ! queue ! autovideosink\n'
+         'autoaudiosrc ! level ! audioconvert ! vorbisenc\n'
+         ' ! mux.audio_0', gtk.STOCK_MEDIA_RECORD),
+        ('Audio recorder, noise gate',
+         'autoaudiosrc ! ladspa-gate\n'
+         'Threshold=-28.0 Decay=2.0 Hold=2.0 Attack=0.1\n'
+         ' ! tee name=t ! autoaudiosink t. ! lame ! filesink location=/tmp/out.mp3',gtk.STOCK_MEDIA_RECORD),
+        ('Image slideshow',
+         'multifilesrc loop=true\n'
+         'location=%05d.png\n'
+         ' ! image/png,framerate=1/1\n'
+         ' ! videorate\n'
+         ' ! image/png,framerate=1/3\n'
+         ' ! pngdec\n'
+         ' ! ffmpegcolorspace\n'
+         ' ! autovideosink', gtk.STOCK_YES),
         ('Live voice changer',
          'autoaudiosrc\n'
          ' ! ladspa-tap-pitch name=pitch\n'
@@ -70,34 +89,42 @@ data = (('iRadio with 10-band EQ',
          ' ! autoaudiosink name=sink  t. ! queue ! audioconvert\n'
          ' ! spectrascope shader=5 shade-amount=36709122 name=scope\n'
          ' ! queue ! autovideoconvert ! autovideosink name=vsink', gtk.STOCK_PREFERENCES),
-        ('Image slideshow',
-         'multifilesrc loop=true\n'
-         'location=%05d.png\n'
-         ' ! image/png,framerate=1/1\n'
-         ' ! videorate\n'
-         ' ! image/png,framerate=1/3\n'
-         ' ! pngdec\n'
-         ' ! ffmpegcolorspace\n'
-         ' ! autovideosink', gtk.STOCK_YES),
-        ('Desktop screen recorder to vp8 webm',
-         'ximagesrc use-damage=0\n'
-         ' ! video/x-raw-rgb,framerate=15/1\n'
-         ' ! ffmpegcolorspace\n'
-         ' ! video/x-raw-yuv,format=(fourcc)I420\n'
-         ' ! tee name=t\n'
-         ' ! vp8enc speed=5\n'
-         ' ! webmmux name=mux\n'
-         ' ! filesink location="/tmp/out.webm"\n'
-         't. ! queue ! autovideosink\n'
-         'autoaudiosrc ! level ! audioconvert ! vorbisenc\n'
-         ' ! mux.audio_0', gtk.STOCK_MEDIA_RECORD),
         ('Sound level meter, oscilliscope',
          'autoaudiosrc\n'
          ' ! level ! wavescope shader=0 ! autovideoconvert ! xvimagesink', gtk.STOCK_PREFERENCES),
-        ('Audio recorder, noise gate',
-         'autoaudiosrc ! ladspa-gate\n'
-         'Threshold=-28.0 Decay=2.0 Hold=2.0 Attack=0.1\n'
-         ' ! tee name=t ! autoaudiosink t. ! lame ! filesink location=/tmp/out.mp3',gtk.STOCK_MEDIA_RECORD),
+        ('Reencode Vorbis to mulaw, play',
+         'filesrc location=/tmp/cooldance.ogg\n'
+         ' ! oggdemux\n'
+         ' ! vorbisdec ! audioconvert\n'
+         ' ! mulawenc ! mulawdec ! autoaudiosink', gtk.STOCK_PREFERENCES),
+        ('Separate audio from video',
+         'filesrc location=/tmp/cam.mkv\n'
+         ' ! matroskademux\n'
+         ' ! vorbisdec\n'
+         ' ! wavenc\n'
+         ' ! filesink location=/tmp/cam.wav', gtk.STOCK_SAVE_AS),
+        ('Capture DV via firewire, transcode into Ogg',
+         'dv1394src\n'
+         ' ! dvdemux name=demux\n'
+         ' ! queue\n'
+         ' ! video/x-dv,systemstream=(boolean)false\n'
+         ' ! dvdec drop-factor=2\n'
+         ' ! videorate\n'
+         ' ! videoscale\n'
+         ' ! video/x-raw-yuv,width=360,height=288\n'
+         ' ! videoscale\n'
+         ' ! video/x-raw-yuv,width=240,height=192,framerate=10.0,format=(fourcc)YUY2\n'
+         ' ! ffmpegcolorspace\n'
+         ' ! theoraenc\n'
+         ' ! oggmux name=mux\n'
+         ' ! filesink location=/tmp/dv.ogg\n'
+         '\n'
+         ' demux.\n'
+         ' ! audio/x-raw-int\n'
+         ' ! queue\n'
+         ' ! audioconvert\n'
+         ' ! vorbisenc\n'
+         ' ! mux.', gtk.STOCK_SAVE_AS),
         ('Streaming Ogg Theora+Vorbis playback, tee to disk',
          'gnomevfssrc location=http://gstreamer.freedesktop.org/media/small/cooldance.ogg\n'
          ' ! tee name=tee\n'
@@ -130,31 +157,4 @@ data = (('iRadio with 10-band EQ',
          'videotestsrc\n'
          ' ! video/x-raw-rgb,height=200,width=320\n'
          ' ! videoscale method=2\n'
-         ' ! ffmpegcolorspace ! autovideosink', gtk.STOCK_PRINT_PREVIEW),
-        ('Reencode Vorbis to mulaw, play',
-         'filesrc location=/tmp/cooldance.ogg\n'
-         ' ! oggdemux\n'
-         ' ! vorbisdec ! audioconvert\n'
-         ' ! mulawenc ! mulawdec ! autoaudiosink', gtk.STOCK_PREFERENCES),
-        ('Capture DV via firewire, transcode into Ogg',
-         'dv1394src\n'
-         ' ! dvdemux name=demux\n'
-         ' ! queue\n'
-         ' ! video/x-dv,systemstream=(boolean)false\n'
-         ' ! dvdec drop-factor=2\n'
-         ' ! videorate\n'
-         ' ! videoscale\n'
-         ' ! video/x-raw-yuv,width=360,height=288\n'
-         ' ! videoscale\n'
-         ' ! video/x-raw-yuv,width=240,height=192,framerate=10.0,format=(fourcc)YUY2\n'
-         ' ! ffmpegcolorspace\n'
-         ' ! theoraenc\n'
-         ' ! oggmux name=mux\n'
-         ' ! filesink location=/tmp/dv.ogg\n'
-         '\n'
-         ' demux.\n'
-         ' ! audio/x-raw-int\n'
-         ' ! queue\n'
-         ' ! audioconvert\n'
-         ' ! vorbisenc\n'
-         ' ! mux.', gtk.STOCK_SAVE_AS))
+         ' ! ffmpegcolorspace ! autovideosink', gtk.STOCK_PRINT_PREVIEW))

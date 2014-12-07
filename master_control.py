@@ -262,7 +262,7 @@ class Master(object):
                 self.queue_newpipe = True
                 self.on_play()
             else:
-                dropdown.set_active(10)
+                dropdown.set_active(9)
             dropdown.set_size_request(245,20)
             button_box.pack_start(dropdown, False)
             vbox.pack_start(button_box,False)
