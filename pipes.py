@@ -62,13 +62,16 @@ data = (('iRadio with 10-band EQ',
          ' ! filesink location="/tmp/out.webm"\n'
          't. ! queue ! autovideosink\n'
          'alsasrc latency-time=100000\n'
-         ' ! level ! audioconvert ! vorbisenc\n'
+         ' ! level ! audioconvert\n'
+         ' ! audio/x-raw-float,channels=2 ! vorbisenc\n'
          ' ! mux.audio_0', gtk.STOCK_MEDIA_RECORD),
         ('Audio recorder, noise gate',
          'alsasrc latency-time=100000\n'
-         ' ! ladspa-gate\n'
-         'Threshold=-28.0 Decay=2.0 Hold=2.0 Attack=0.1\n'
-         ' ! tee name=t ! autoaudiosink t. ! lame ! filesink location=/tmp/out.mp3',gtk.STOCK_MEDIA_RECORD),
+         ' ! audioconvert\n'
+         ' ! ladspa-gate Threshold=-28.0 Decay=2.0 Hold=2.0 Attack=0.1\n'
+         ' ! queue ! audioconvert\n'
+         ' ! audio/x-raw-int,channels=2\n'
+         ' ! lame ! filesink location=/tmp/out.mp3',gtk.STOCK_MEDIA_RECORD),
         ('Image slideshow',
          'multifilesrc loop=true\n'
          'location=%05d.png\n'
@@ -80,11 +83,13 @@ data = (('iRadio with 10-band EQ',
          ' ! autovideosink', gtk.STOCK_YES),
         ('Live voice changer',
          'alsasrc latency-time=100000\n'
+         ' ! audioconvert\n'
          ' ! ladspa-tap-pitch name=pitch\n'
          'Wet-Level--dB-=20 Dry-Level--dB-=10 Semitone-Shift=-5\n'
          ' ! autoaudiosink', gtk.STOCK_PREFERENCES),
         ('Voice change chorus with spectrascope',
          'alsasrc latency-time=100000\n'
+         ' ! audioconvert\n'
          ' ! ladspa-tap-pitch name=pitch\n'
          'Wet-Level--dB-=20 Dry-Level--dB-=20 Semitone-Shift=12\n'
          ' ! tee name=t ! level ! queue ! audioconvert\n'
