@@ -54,6 +54,7 @@ class Master(object):
             if os.path.isfile(argv[1]):
                 with open(argv[1], 'r') as f:
                     self.args=f.read()
+                self.open_filename = argv[1]
                 
         # Change to executable's dir
         self.path = os.path.dirname(sys.argv[0])
@@ -309,6 +310,8 @@ class Master(object):
         return False
     def change_pipeline(self, combobox, txt=None):
         if combobox:
+            title = combobox.get_model()[combobox.get_active()][1]
+            self.window.set_title(title)
             txt = combobox.get_model()[combobox.get_active()][-1]
             buf = self.textbuf
             buf.set_text(txt)
@@ -334,7 +337,6 @@ class Master(object):
                 hbox.pack_start(rec,False)
                 hbox.reorder_child(rec,0)
                 rec.show()
-            
         return False
     def init_slider(self, adj, digits=0):
         """Apply defaults to gtk.VScale slider widgets"""
@@ -478,8 +480,13 @@ class Master(object):
                 self.on_play()
             elif case("_Rewind","Ctrl+Left"):
                 tf = gst.Format(gst.FORMAT_TIME)
-                d = self.pipeline.query_position(tf, None)[0]
-                nt = d - 10 * 1000000000
+                try:
+                    d = self.pipeline.query_position(tf, None)[0]
+                except gst.QueryError:
+                    d = 0
+                    nt = 0
+                else:
+                    nt = d - 10 * 1000000000
                 if nt < 1:
                     nt = 1
                 self.pipeline.seek_simple(gst.FORMAT_TIME,
@@ -489,8 +496,13 @@ class Master(object):
                 gst.SEEK_FLAG_FLUSH | gst.SEEK_FLAG_KEY_UNIT, 1)
             elif case("_Fast Forward","Ctrl+Right"):
                 tf = gst.Format(gst.FORMAT_TIME)
-                d = self.pipeline.query_position(tf, None)[0]
-                nt = d + 10 * 1000000000
+                try:
+                    d = self.pipeline.query_position(tf, None)[0]
+                except gst.QueryError:
+                    d = 0
+                    nt = 0
+                else:
+                    nt = d + 10 * 1000000000
                 self.pipeline.seek_simple(gst.FORMAT_TIME,
                 gst.SEEK_FLAG_FLUSH | gst.SEEK_FLAG_KEY_UNIT, nt)
             elif case("R_efresh","F5"):
@@ -511,7 +523,10 @@ class Master(object):
                         cmds.append(sel)
                     except:
                         pass
-                txt = subprocess.check_output(cmds)
+                try:
+                    txt = subprocess.check_output(cmds)
+                except CalledProcessError, NameError:
+                    txt = ''
                 if len(cmds) < 2:
                     tw=text_window('gst-inspect', txt, True, self.search_inspect)
                 else:
@@ -537,7 +552,7 @@ class Master(object):
     def init_gui(self):
         """ Initialize the GUI components """
         self.window = gtk.Window()
-        self.window.set_title(appname)
+        self.window.set_title(appname + ' | ' + self.open_filename)
         self.icon = gtk.gdk.pixbuf_new_from_file(appname+".png")
         self.window.set_icon(self.icon)
         self.window.connect("delete-event", self.main_quit)
@@ -720,6 +735,7 @@ class Master(object):
         ]]
         bus.enable_sync_message_emission()
         self.pipeline.set_state(gst.STATE_PLAYING)
+        gtk.timeout_add(200,self.window.present)
         return False # Return False or this will repeat
     def on_pause(self, button=None):
         """Pause"""
@@ -809,7 +825,7 @@ class Master(object):
         """Populate Pad Window with controls"""
         dlg = gtk.Dialog(pad.get_name(), None,
             gtk.DIALOG_DESTROY_WITH_PARENT)
-        dlg.set_size_request(-1,180)
+        dlg.set_size_request(-1,190)
         hbox = gtk.HBox()
         # >>> prop = list(pad.props)[-1]
         # >>> prop.minimum = slider_value
@@ -818,7 +834,6 @@ class Master(object):
         ypack(None,None,None,False,False)
         dlg.vbox.pack_start(hbox,True)
         dlg.show_all()
-        dlg.present()
     def tweak_changed(self, e=None, evt=None, p=None):
         try:
             ele,prop = p
