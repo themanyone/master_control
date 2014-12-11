@@ -31,6 +31,7 @@ data = (('iRadio with 10-band EQ',
         ('Simple webcam viewer',
          'v4l2src\n'
          ' ! autovideoconvert\n'
+         ' ! videoflip\n'
          ' ! autovideosink', gtk.STOCK_PRINT_PREVIEW),
         ('Webcam HD recorder',
          'matroskamux name=mux\n'
