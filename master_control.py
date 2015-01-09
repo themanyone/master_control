@@ -58,14 +58,14 @@ class Master(object):
                 
         # Change to executable's dir
         self.path = os.path.dirname(sys.argv[0])
-        if self.path:
+        if self.path and not self.open_filename:
             os.chdir(self.path)
 
         self.init_gui()
         self.init_msg_dialog()
         self.init_err_dialog()
         self.init_file_chooser()
-
+        
     def init_msg_dialog(self):
         me = self.msg_dialog = gtk.Dialog("Gstreamer Message Bus", None,
             gtk.DIALOG_DESTROY_WITH_PARENT)
@@ -553,7 +553,7 @@ class Master(object):
         """ Initialize the GUI components """
         self.window = gtk.Window()
         self.window.set_title(appname + ' | ' + self.open_filename)
-        self.icon = gtk.gdk.pixbuf_new_from_file(appname+".png")
+        self.icon = gtk.gdk.pixbuf_new_from_file(os.path.join(self.path, appname+".png"))
         self.window.set_icon(self.icon)
         self.window.connect("delete-event", self.main_quit)
         self.top_area = gtk.ScrolledWindow(gtk.Adjustment(0,0,400,1,1,1))
@@ -607,23 +607,31 @@ class Master(object):
         vertlayout.pack_end(self.bottom_area,True)
         self.window.add(vertlayout)
         self.window.show_all()
+        
     def on_resize(self, window, alloc):
+        window = self.window.get_window()
+        if not window: return
         parent = self.sourceview.get_parent()
         vscrollbar = parent.get_vscrollbar()
+        hscrollbar = self.top_area.get_hscrollbar()
         dropdown_alloc = self.dropdown.get_allocation()
-        vsize = 150
+        vsize = (alloc[3] - 100) / 2
+        if vsize < 200:
+            vsize = 200
         border = 3
-        hadj = -border
+        hadj = alloc[2]-border
         if vscrollbar.get_property("visible"):
             hadj -= 20
-        self.sourceview.set_size_request(alloc[2]+hadj,vsize)
+        self.sourceview.set_size_request(hadj,vsize)
+        self.notebook.set_size_request(-1,vsize)
         dropdown_x = alloc[2]-dropdown_alloc[0]-border
         if alloc[2]<600:
             self.dropdown.set_size_request(dropdown_x,20)
+        
     def sourceview_pressed(self, widget=None, event=None, user_param1=None):
         """Scroll Textbox Into View"""
-        scrollbar = self.top_area.get_hscrollbar()
-        scrollbar.set_value(0)
+        hscrollbar = self.top_area.get_hscrollbar()
+        hscrollbar.set_value(0)
     def on_page_turned(self, page, page_num, user_param1=None):
         pass
     def buffer_changed(self, buffer=None):
