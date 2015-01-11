@@ -510,7 +510,7 @@ class Master(object):
                 self.on_play()
             elif case("_Usage Help","Ctrl+H"):
                 self.on_help("README")
-            elif case("_Inspect Selected","Ctrl+I"):
+            elif case("_Inspect Selected","Alt+I"):
                 cmds = ["gst-inspect"]
                 # txt is selection
                 try:
@@ -597,7 +597,7 @@ class Master(object):
             (("_Help",gtk.STOCK_HELP),(
                 ("_Usage Help","<Ctrl>H",gtk.STOCK_HELP),
                 ("_Plugins","<Shift><Ctrl>P",gtk.STOCK_HELP),
-                ("_Inspect Selected","<Ctrl>I",gtk.STOCK_HELP),
+                ("_Inspect Selected","<Alt>I",gtk.STOCK_HELP),
                 ("_About","<Shift><Ctrl>A",gtk.STOCK_ABOUT),
                 )),
             ))
