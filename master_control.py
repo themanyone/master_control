@@ -61,11 +61,19 @@ class Master(object):
         if self.path and not self.open_filename:
             os.chdir(self.path)
 
+        # program init flow:
+        # init_gui -> gst_notebook -> change_pipeline -> on_play
         self.init_gui()
         self.init_msg_dialog()
         self.init_err_dialog()
+        self.init_vid_preview()
         self.init_file_chooser()
         
+    def init_vid_preview(self):
+        me = self.vid_preview = gtk.Dialog("Video Preview", None,
+            gtk.DIALOG_DESTROY_WITH_PARENT)
+        me.set_default_size(320, 240)
+        me.connect("delete_event",self.dialog_delete)
     def init_msg_dialog(self):
         me = self.msg_dialog = gtk.Dialog("Gstreamer Message Bus", None,
             gtk.DIALOG_DESTROY_WITH_PARENT)
@@ -99,10 +107,6 @@ class Master(object):
         filter.add_pattern("*.txt")
         filter.add_pattern("*[A-Z]")
         me.set_filter(filter)
-            
-    def do_undo(self):
-        begin,end = self.textbuf.get_bounds()
-        
     def show_err(self, err):
         me = self.err_dialog
         me.label.set_text(str(err))
@@ -111,7 +115,6 @@ class Master(object):
     def show_msg(self, obj):
         msg = str(obj)+'\n'
         me = self.msg_dialog
-
         if me.get_visible():
             buf   = me.textview.get_buffer()
             lines = buf.get_line_count()
@@ -207,13 +210,14 @@ class Master(object):
                 widget.set_sensitive(False)
             except:
                 pass
+
     def gst_notebook(self):
         """ notebook with gst tweak sliders for each element """
         try:
             # try to recycle it, remove all but page 1
             notebook = self.notebook
             # self.hbox0.remove(notebook)
-            pages   =notebook.get_n_pages()
+            pages = notebook.get_n_pages()
             for x in range(1,pages):
                 notebook.remove_page(-1)
         except:
@@ -360,7 +364,9 @@ class Master(object):
             self.bottom_area.pack_start(self.movie_window,False)
             self.movie_window.show()
         else:
-            # if it does exist, attach it
+            # if it does exist, attach it, unless False (init)
+            if not imagesink:
+                return False
             if not imagesink.got_xwindow_id(self.movie_window.window.xid):
                 imagesink.set_xwindow_id(self.movie_window.window.xid)
             # if attached, forget about it, add another later
@@ -460,6 +466,10 @@ class Master(object):
                 self.msg_dialog.present()
             elif case("_Popup Video","Shift+Ctrl+V"):
                 self.grab_video_windows = not self.grab_video_windows
+                if self.grab_video_windows:
+                    self.vertlayout.set_position(260)
+                else:
+                    self.vertlayout.set_position(999)
                 self.queue_newpipe = True
                 self.on_stop()
                 self.on_play()
@@ -552,6 +562,7 @@ class Master(object):
     def init_gui(self):
         """ Initialize the GUI components """
         self.window = gtk.Window()
+        self.window.set_default_size(200, 500)
         self.window.set_title(appname + ' | ' + self.open_filename)
         self.icon = gtk.gdk.pixbuf_new_from_file(os.path.join(self.path, appname+".png"))
         self.window.set_icon(self.icon)
@@ -562,7 +573,7 @@ class Master(object):
         self.top_area.set_policy(gtk.POLICY_ALWAYS,gtk.POLICY_NEVER)
         self.gst_notebook()
         self.top_area.add_with_viewport(self.notebook)
-        vertlayout = gtk.VBox()
+        self.vertlayout = gtk.VPaned()
         self.menu_bar = build_menus(self.window,self.on_menu_activate,(
             (("_File",gtk.STOCK_DIRECTORY),(
                 ("_Open","<Ctrl>O",gtk.STOCK_OPEN),
@@ -601,13 +612,20 @@ class Master(object):
                 ("_About","<Shift><Ctrl>A",gtk.STOCK_ABOUT),
                 )),
             ))
-        vertlayout.pack_start(self.menu_bar,False)
-        vertlayout.pack_start(self.top_area,False)
         self.bottom_area = gtk.HBox()
-        vertlayout.pack_end(self.bottom_area,True)
-        self.window.add(vertlayout)
+        self.request_video_preview(False) # False = init
+        tophalf = gtk.VBox()
+        tophalf.pack_start(self.menu_bar, False)
+        tophalf.pack_start(self.top_area, True)
+        self.vertlayout.add1(tophalf)
+        self.vertlayout.add2(self.bottom_area)
+        self.vertlayout.show_all()
+        # vertical layout refinement test
+        # self.vertlayout.connect("move-handle", self.handle_moved)
+        self.vertlayout.set_position(260)
+        self.bottom_area.show()
+        self.window.add(self.vertlayout)
         self.window.show_all()
-        
     def on_resize(self, window, alloc):
         window = self.window.get_window()
         if not window: return
@@ -627,13 +645,16 @@ class Master(object):
         dropdown_x = alloc[2]-dropdown_alloc[0]-border
         if alloc[2]<600:
             self.dropdown.set_size_request(dropdown_x,20)
-        
+    # def handle_moved(self, paned, scrolltype):
+        # pos = self.vertlayout.get_position()
+        # print(pos)
     def sourceview_pressed(self, widget=None, event=None, user_param1=None):
         """Scroll Textbox Into View"""
         hscrollbar = self.top_area.get_hscrollbar()
         hscrollbar.set_value(0)
     def on_page_turned(self, page, page_num, user_param1=None):
-        pass
+        if page_num:
+            self.vertlayout.set_position(260)
     def buffer_changed(self, buffer=None):
         self.queue_newpipe = True
     def teardown(self,obj):
