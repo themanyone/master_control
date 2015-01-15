@@ -30,6 +30,7 @@ data = (('iRadio with 10-band EQ',
          'playbin2 uri=dvd:// flags=7', gtk.STOCK_CDROM),
         ('Simple webcam viewer',
          'v4l2src\n'
+         ' ! video/x-raw-yuv,width=320\n'
          ' ! autovideoconvert\n'
          ' ! videoflip\n'
          ' ! autovideosink', gtk.STOCK_PRINT_PREVIEW),

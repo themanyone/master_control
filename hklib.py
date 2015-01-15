@@ -27,6 +27,41 @@ def unquote(s):
     s=s.replace('"','\'')
     return s
 
+class VideoWindow(gtk.Window):
+    def __init__(self, parent):
+        self.p = parent
+        gtk.Window.__init__(self)
+        self.set_default_size(320, 240)
+        self.set_title("Preview")
+        self.connect("delete_event", self.dialog_delete)
+        self.vbox = gtk.VBox()
+        self.add(self.vbox)
+    def dialog_delete(self,a,b):
+        self.p.toggle_grab()
+        a.hide()
+        return True
+    
+class VideoWidget(gtk.DrawingArea):
+    def __init__(self):
+        gtk.DrawingArea.__init__(self)
+        self.imagesink = None
+        self.unset_flags(gtk.DOUBLE_BUFFERED)
+
+    def do_expose_event(self, event):
+        if self.imagesink:
+            self.imagesink.expose()
+            return False
+        else:
+            return True
+
+    def set_sink(self, sink):
+        try:
+            assert self.window.xid
+        except AttributeError:
+            self.show_all()
+        self.imagesink = sink
+        self.imagesink.set_xwindow_id(self.window.xid)
+
 class switch(object):
     """Implements switch statement in Python
     http://code.activestate.com/recipes/410692/"""

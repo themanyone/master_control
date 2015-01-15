@@ -44,6 +44,9 @@ class Master(object):
     open_filename=''
     grab_video_windows = True
     queue_newpipe = True
+    imagesink = None
+    bottom_video = VideoWidget()
+    preview_video = VideoWidget()
     
     def __init__(self, argv):
         self.args = ""
@@ -64,16 +67,14 @@ class Master(object):
         # program init flow:
         # init_gui -> gst_notebook -> change_pipeline -> on_play
         self.init_gui()
+        self.init_preview_window()
         self.init_msg_dialog()
         self.init_err_dialog()
-        self.init_vid_preview()
         self.init_file_chooser()
         
-    def init_vid_preview(self):
-        me = self.vid_preview = gtk.Dialog("Video Preview", None,
-            gtk.DIALOG_DESTROY_WITH_PARENT)
-        me.set_default_size(320, 240)
-        me.connect("delete_event",self.dialog_delete)
+    def init_preview_window(self):
+        me = self.preview_window = VideoWindow(self)
+
     def init_msg_dialog(self):
         me = self.msg_dialog = gtk.Dialog("Gstreamer Message Bus", None,
             gtk.DIALOG_DESTROY_WITH_PARENT)
@@ -353,25 +354,23 @@ class Master(object):
         return vscale
     def request_video_preview(self, imagesink):
         """Capture all video sinks; add to preview panel"""
-        if not self.grab_video_windows:
-            return False
-        # add one if it doesn't exist
-        try:
-            self.movie_window.window.xid
-        except AttributeError:
-            self.movie_window = gtk.DrawingArea()
-            self.movie_window.set_size_request(320,200)
-            self.bottom_area.pack_start(self.movie_window,False)
-            self.movie_window.show()
+        if imagesink:
+            self.imagesink = imagesink            
+        if self.grab_video_windows:
+            if self.bottom_video.parent != self.bottom_area:
+                self.bottom_area.pack_start(self.bottom_video,True)
+            if self.imagesink:
+                # self.imagesink.set_xwindow_id(self.bottom_video.window.xid)
+                self.bottom_video.set_sink(self.imagesink)
+                self.preview_window.hide()
         else:
-            # if it does exist, attach it, unless False (init)
-            if not imagesink:
-                return False
-            if not imagesink.got_xwindow_id(self.movie_window.window.xid):
-                imagesink.set_xwindow_id(self.movie_window.window.xid)
-            # if attached, forget about it, add another later
-            else:
-                self.movie_window = None
+            self.preview_video.show()
+            if self.preview_video.parent != self.preview_window.vbox:
+                self.preview_window.vbox.pack_start(self.preview_video,True)
+                self.preview_window.show_all()
+            if self.imagesink:
+                self.preview_video.set_sink(self.imagesink)
+            gtk.timeout_add(150,self.window.present)
     def request_level_control(self):
         """Preview panel widgets for "level" elements in pipe"""
         try:
@@ -465,14 +464,7 @@ class Master(object):
             elif case("_Messages", "Ctrl+M"):
                 self.msg_dialog.present()
             elif case("_Popup Video","Shift+Ctrl+V"):
-                self.grab_video_windows = not self.grab_video_windows
-                if self.grab_video_windows:
-                    self.vertlayout.set_position(260)
-                else:
-                    self.vertlayout.set_position(999)
-                self.queue_newpipe = True
-                self.on_stop()
-                self.on_play()
+                self.toggle_grab()
             elif case("Popup _Tab","Shift+Ctrl+T"):
                 try:
                     ele.props
@@ -546,6 +538,17 @@ class Master(object):
                 tw=text_window('gst-inspect', txt, True, self.search_inspect)
             elif case("_About","Shift+Ctrl+A"):
                 self.on_help("ABOUT")
+    def toggle_grab(self):
+        self.grab_video_windows = not self.grab_video_windows
+        if self.grab_video_windows:
+            self.bottom_area.hide()
+            self.request_video_preview(False)
+            self.vertlayout.set_position(260)
+            gtk.timeout_add(99,self.bottom_area.show_all)
+        else:
+            self.request_video_preview(False)
+            self.vertlayout.set_position(900)
+            gtk.timeout_add(99,self.preview_window.show_all)
     def search_inspect(self, button, textview=None):
         cmds = ["gst-inspect"]
         sel=get_selected(textview)
@@ -695,25 +698,11 @@ class Master(object):
                     x.set_state(gst.STATE_NULL)
                     self.pipeline.unlink(x)
                 del self.pipeline
-                # gst.object_unref(pipeline)
                 # clear bottom area
-                self.bottom_area.forall(lambda x:x.destroy())
-                try:
-                    self.movie_window.destroy()
-                except:
-                    pass
-                try:
-                    del self.movie_window
-                except:
-                    pass
-                try:
-                    self.level0.destroy()
-                except:
-                    pass
-                try:
-                    del self.level0
-                except:
-                    pass
+                # self.bottom_area.forall(lambda x:x.destroy())
+                for x in self.bottom_area:
+                    if x != self.bottom_video:
+                        x.destroy()
             # wait for GUI, so we can put video on it
             gtk.idle_add(self.new_pipe)
             # put controls into notebook
@@ -764,7 +753,7 @@ class Master(object):
         ]]
         bus.enable_sync_message_emission()
         self.pipeline.set_state(gst.STATE_PLAYING)
-        gtk.timeout_add(200,self.window.present)
+        gtk.timeout_add(50,self.window.present)
         return False # Return False or this will repeat
     def on_pause(self, button=None):
         """Pause"""
@@ -820,8 +809,12 @@ class Master(object):
         if msg.type == gst.MESSAGE_ELEMENT:
             if msgname == "prepare-xwindow-id":
                 # Assign the viewport
+                # Sync with the X server before giving the X-id to the sink
+                gtk.gdk.threads_enter()
+                gtk.gdk.display_get_default().sync()
                 imagesink = msg.src
                 imagesink.set_property("force-aspect-ratio", True)
+                gtk.gdk.threads_leave()
                 self.request_video_preview(imagesink)
             elif msgname[:5]=="level":
                 try:
