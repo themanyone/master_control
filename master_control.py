@@ -530,12 +530,12 @@ class Master(object):
                 except CalledProcessError, NameError:
                     txt = ''
                 if len(cmds) < 2:
-                    tw=text_window('gst-inspect', txt, True, self.search_inspect)
+                    tw = TextWindow('gst-inspect', txt, self.search_inspect)
                 else:
-                    tw=text_window(sel, txt)                   
+                    tw = TextWindow(sel, txt)                   
             elif case("_Plugins","Shift+Ctrl+P"):
                 txt = subprocess.check_output(["gst-inspect"])
-                tw=text_window('gst-inspect', txt, True, self.search_inspect)
+                tw = TextWindow('gst-inspect', txt, self.search_inspect)
             elif case("_About","Shift+Ctrl+A"):
                 self.on_help("ABOUT")
     def toggle_grab(self):
@@ -555,7 +555,7 @@ class Master(object):
         cmds.append(sel)
         try:
             txt = subprocess.check_output(cmds)
-            tw=text_window(sel, txt)
+            tw = TextWindow(sel, txt)
         except:
             pass
     def on_key(self, accelgroup, acceleratable, accel_key, accel_mods, user_param1 = None):
@@ -847,8 +847,9 @@ class Master(object):
         """Populate Pad Window with controls"""
         dlg = gtk.Dialog(pad.get_name(), None,
             gtk.DIALOG_DESTROY_WITH_PARENT)
-        dlg.set_size_request(-1,190)
+        dlg.set_size_request(-1,200)
         hbox = gtk.HBox()
+        dlg.connect("key-press-event", self.pad_window_key)
         # >>> prop = list(pad.props)[-1]
         # >>> prop.minimum = slider_value
         for prop in list(pad.props):
@@ -856,6 +857,9 @@ class Master(object):
         ypack(None,None,None,False,False)
         dlg.vbox.pack_start(hbox,True)
         dlg.show_all()
+    def pad_window_key(self, widget, event):
+        if event.string == '\x17': # Ctrl-W
+            widget.destroy()
     def tweak_changed(self, e=None, evt=None, p=None):
         try:
             ele,prop = p
