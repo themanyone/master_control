@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Copyright (C) 2014 Henry Kroll III, http://www.TheNerdShow.com
-# some data from gst-python0.10/examples/pipeline-tester
+#
+# Data forked from gst-python0.10/examples/pipeline-tester
 # Copyright (C) 2005 Andy Wingo <wingo@pobox.com>
 #
 # This library is free software; you can redistribute it and/or
@@ -13,9 +14,8 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # Library General Public License for more details.
 #
-# You should have received a copy of the GNU Library General Public
-# License along with this library; if not, write to the
-# Free Software Foundation, Inc., 59 Temp
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import gtk
 data = (('iRadio with 10-band EQ',
