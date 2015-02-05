@@ -104,9 +104,7 @@ class Master(object):
         buttons=(gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT,
             gtk.STOCK_OK, gtk.RESPONSE_ACCEPT), backend=None)
         filter=gtk.FileFilter()
-        filter.add_pattern("*.gst")
-        filter.add_pattern("*.txt")
-        filter.add_pattern("*[A-Z]")
+        map(filter.add_pattern, ("*.gst", "*.txt", "*[A-Z]"))
         me.set_filter(filter)
     def show_err(self, err):
         me = self.err_dialog
@@ -314,6 +312,10 @@ class Master(object):
         self.notebook.connect("switch-page",self.on_page_turned)
         return False
     def change_pipeline(self, combobox, txt=None):
+        try:
+            del self.level0
+        except:
+            pass
         if combobox:
             title = combobox.get_model()[combobox.get_active()][1]
             self.window.set_title(title)
@@ -541,7 +543,7 @@ class Master(object):
     def toggle_grab(self):
         self.grab_video_windows = not self.grab_video_windows
         if self.grab_video_windows:
-            self.bottom_area.hide()
+            # self.bottom_area.hide()
             self.request_video_preview(False)
             self.vertlayout.set_position(260)
             gtk.timeout_add(99,self.bottom_area.show_all)

@@ -25,7 +25,7 @@ class VideoWindow(gtk.Window):
     def __init__(self, parent):
         self.p = parent
         gtk.Window.__init__(self)
-        self.set_default_size(320, 240)
+        self.set_default_size(640, 480)
         self.set_title("Preview")
         self.connect("delete-event", self.destroy_cb)
         self.vbox = gtk.VBox()
