@@ -18,22 +18,27 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import gtk
-data = (('iRadio with 10-band EQ',
+data = (
+        ('iRadio with 10-band EQ',
          'souphttpsrc location=http://streaming.radionomy.com/GuitarWarrior\n'
          ' ! decodebin ! tee name=t ! audioconvert\n'
          ' ! equalizer-10bands ! autoaudiosink t. ! queue ! audioconvert\n'
          ' ! synaescope shader=2 shade-amount=4047179778\n'
          ' ! queue ! autovideoconvert ! autovideosink', gtk.STOCK_ABOUT),
+
         ('Play Anything (drag and drop onto player)',
          'playbin2 uri=', gtk.STOCK_CDROM),
+
         ('play DVD (Popup video first)',
          'playbin2 uri=dvd:// flags=7', gtk.STOCK_CDROM),
+
         ('Simple webcam viewer',
          'v4l2src\n'
          ' ! video/x-raw-yuv,width=320\n'
          ' ! autovideoconvert\n'
          ' ! videoflip\n'
          ' ! autovideosink', gtk.STOCK_PRINT_PREVIEW),
+
         ('Webcam HD recorder',
          'matroskamux name=mux\n'
          ' ! filesink sync=false qos=1 location=/tmp/cam.mkv\n'
@@ -43,8 +48,10 @@ data = (('iRadio with 10-band EQ',
          ' ! audioconvert ! audio/x-raw-float,channels=2 ! queue\n'
          ' ! vorbisenc ! mux.audio_0 pq. ! queue leaky=1\n'
          ' ! xvimagesink sync=false', gtk.STOCK_MEDIA_RECORD),
+
         ('HD video playback',
          'playbin2 uri=file:///tmp/cam.mkv', gtk.STOCK_MEDIA_PLAY),
+
         ('Webcam Timelapse 5 to 25fps',
          'matroskamux name=mux ! filesink\n'
          'location=/tmp/cam.mkv\n'
@@ -53,6 +60,7 @@ data = (('iRadio with 10-band EQ',
          ' ! videorate force-fps=25/1 drop-only=true\n'
          ' ! tee name=pq ! queue ! jpegparse ! mux.\n'
          ' pq. ! queue ! jpegdec ! autovideosink', gtk.STOCK_MEDIA_RECORD),
+
         ('Desktop screen recorder to vp8 webm',
          'ximagesrc use-damage=0\n'
          ' ! video/x-raw-rgb,framerate=15/1\n'
@@ -67,6 +75,7 @@ data = (('iRadio with 10-band EQ',
          ' ! level ! audioconvert\n'
          ' ! audio/x-raw-float,channels=2 ! vorbisenc\n'
          ' ! mux.audio_0', gtk.STOCK_MEDIA_RECORD),
+
         ('Audio recorder, noise gate',
          'autoaudiosrc\n'
          ' ! audioconvert\n'
@@ -74,6 +83,7 @@ data = (('iRadio with 10-band EQ',
          ' ! queue ! audioconvert\n'
          ' ! audio/x-raw-int,channels=2\n'
          ' ! lame ! filesink location=/tmp/out.mp3',gtk.STOCK_MEDIA_RECORD),
+
         ('Image slideshow',
          'multifilesrc loop=true\n'
          'location=%05d.png\n'
@@ -83,12 +93,14 @@ data = (('iRadio with 10-band EQ',
          ' ! pngdec\n'
          ' ! ffmpegcolorspace\n'
          ' ! autovideosink', gtk.STOCK_YES),
+
         ('Live voice changer',
          'autoaudiosrc\n'
          ' ! audioconvert\n'
          ' ! ladspa-tap-pitch name=pitch\n'
          'Wet-Level--dB-=20 Dry-Level--dB-=10 Semitone-Shift=-5\n'
          ' ! autoaudiosink', gtk.STOCK_PREFERENCES),
+
         ('Voice change chorus with spectrascope',
          'autoaudiosrc\n'
          ' ! audioconvert\n'
@@ -98,20 +110,24 @@ data = (('iRadio with 10-band EQ',
          ' ! autoaudiosink name=sink  t. ! queue ! audioconvert\n'
          ' ! spectrascope shader=5 shade-amount=36709122 name=scope\n'
          ' ! queue ! autovideoconvert ! autovideosink name=vsink', gtk.STOCK_PREFERENCES),
+
         ('Sound level meter, oscilliscope',
          'autoaudiosrc\n'
          ' ! level ! wavescope shader=0 ! autovideoconvert ! xvimagesink', gtk.STOCK_PREFERENCES),
+
         ('Reencode Vorbis to mulaw, play',
          'filesrc location=/tmp/cooldance.ogg\n'
          ' ! oggdemux\n'
          ' ! vorbisdec ! audioconvert\n'
          ' ! mulawenc ! mulawdec ! autoaudiosink', gtk.STOCK_PREFERENCES),
+
         ('Separate audio from video',
          'filesrc location=/tmp/cam.mkv\n'
          ' ! matroskademux\n'
          ' ! vorbisdec\n'
          ' ! wavenc\n'
          ' ! filesink location=/tmp/cam.wav', gtk.STOCK_SAVE_AS),
+
         ('Capture DV via firewire, transcode into Ogg',
          'dv1394src\n'
          ' ! dvdemux name=demux\n'
@@ -134,6 +150,7 @@ data = (('iRadio with 10-band EQ',
          ' ! audioconvert\n'
          ' ! vorbisenc\n'
          ' ! mux.', gtk.STOCK_SAVE_AS),
+
         ('Streaming Ogg Theora+Vorbis playback, tee to disk',
          'gnomevfssrc location=http://gstreamer.freedesktop.org/media/small/cooldance.ogg\n'
          ' ! tee name=tee\n'
@@ -141,15 +158,18 @@ data = (('iRadio with 10-band EQ',
          ' demux. ! queue ! theoradec ! ffmpegcolorspace ! autovideosink\n'
          ' demux. ! queue ! vorbisdec ! audioconvert ! autoaudiosink\n'
          ' tee. ! queue ! filesink location=/tmp/cooldance.ogg', gtk.STOCK_SAVE_AS),
+
         ('Video test, YUV format',
          'videotestsrc\n'
          ' ! video/x-raw-yuv,format=(fourcc)I420\n'
          ' ! ffmpegcolorspace ! autovideosink', gtk.STOCK_PRINT_PREVIEW),
+
         ('Video test, RGB format',
          'videotestsrc\n'
          ' ! video/x-raw-rgb,red_mask=0xff00\n'
          ' ! ffmpegcolorspace\n'
          ' ! autovideosink', gtk.STOCK_PRINT_PREVIEW),
+
         ('Video overlays',
          'videotestsrc pattern="snow"\n'
          ' ! video/x-raw-yuv, framerate=10/1, width=200,\n'
@@ -162,8 +182,11 @@ data = (('iRadio with 10-band EQ',
          ' ! video/x-raw-yuv, framerate=10/1, width=200, height=150\n'
          ' ! mix. videotestsrc\n'
          ' ! video/x-raw-yuv, framerate=10/1, width=640,\n'         'height=360 ! mix.', gtk.STOCK_PRINT_PREVIEW),
+
         ('Software scaling',
          'videotestsrc\n'
          ' ! video/x-raw-rgb,height=200,width=320\n'
          ' ! videoscale method=2\n'
-         ' ! ffmpegcolorspace ! autovideosink', gtk.STOCK_PRINT_PREVIEW))
+         ' ! ffmpegcolorspace ! autovideosink', gtk.STOCK_PRINT_PREVIEW)
+
+) # data

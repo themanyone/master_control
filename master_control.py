@@ -18,6 +18,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import threading
 import pygtk
 pygtk.require('2.0')
 import gtk, gtksourceview2
@@ -812,6 +813,7 @@ class Master(object):
             if msgname == "prepare-xwindow-id":
                 # Assign the viewport
                 # Sync with the X server before giving the X-id to the sink
+		gtk.gdk.threads_init()
                 gtk.gdk.threads_enter()
                 gtk.gdk.display_get_default().sync()
                 imagesink = msg.src
