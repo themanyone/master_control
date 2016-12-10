@@ -1,6 +1,8 @@
 # Master Control by Henry Kroll
 
-Master Control studio is a TV station in a box. It generates a GUI with mixer knobs and controls for gstreamer plugins playing and mixing live multimedia streams on Linux.
+Master Control studio is a TV station in a box. It generates a GUI with mixer knobs and controls for gstreamer plugins playing and mixing live multimedia streams on Linux, helping people rapidly develop, test, and control new multimedia applications.
+
+[Visit the Master Control website](http://thenerdshow.com/master%20control.html)
 
 create, launch, test, and control running instances of (short list)
 
@@ -44,7 +46,7 @@ under the Gnu Public License, Version 3. The following packages, upon
 which Master Control depends, may be downloaded, or compiled for just 
 about any operating system.
 
-* [2.7](Python)(http://www.python.org/)
+* [Python 2.7](http://www.python.org/)
 * [pygtk2](http://www.pygtk.org/)
 * [gstreamer, including gstreamer-python](http://gstreamer.freedesktop.org/)
 * [gtksourceview2](http://gtksourceview.sourceforge.net/)
