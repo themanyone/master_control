@@ -1,53 +1,53 @@
-=Master Control by Henry Kroll=
+# Master Control by Henry Kroll
 
-Master Control can
+Master Control studio is a TV station in a box. It generates a GUI with mixer knobs and controls for gstreamer plugins playing and mixing live multimedia streams on Linux.
 
 create, launch, test, and control running instances of (short list)
 
-    * Internet radios
-    * image slide shows
-    * DVD players
-    * HD webcam recorders
-    * timelapse video recorders
-    * desktop screen recorders
-    * spectrum analyzers, oscilliscopes
-    * live special effects panels
+* Internet radios
+* image slide shows
+* DVD players
+* HD webcam recorders
+* timelapse video recorders
+* desktop screen recorders
+* spectrum analyzers, oscilliscopes
+* live special effects panels
 
 In addition, Master Control can
 
-    * edit text with it's built-in editor
-    * save and load multimedia pipelines
-    * generate mixer panels, pads, tweak
-    * combine various effects
+* edit text with it's built-in editor
+* save and load multimedia pipelines
+* generate mixer panels, pads, tweak
+* combine various effects
     
 Capabilities inherited from GStreamer, not limited to
 
-    * splitting audio from video files
-    * audio filters, mixers, converters
-    * video filters, mixers, converters
-    * broadcasting webm, videoconferenceing
-    * mixing and muxing, streaming live videos
-    * write files, multiple sources, sinks
-    * filtering, removing noise
-    * picture-in-picture, subtitles
-    * synthesizing speech (requires festival)
-    * voice recognition subtitles (requires pocketsphinx)
-    * capturing DV via firewire, transcoding.
-    * motion sensing
-    * face recognition (requires openCV)
-    * ... limitless other things
+* splitting audio from video files
+* audio filters, mixers, converters
+* video filters, mixers, converters
+* broadcasting webm, videoconferenceing
+* mixing and muxing, streaming live videos
+* write files, multiple sources, sinks
+* filtering, removing noise
+* picture-in-picture, subtitles
+* synthesizing speech (requires festival)
+* voice recognition subtitles (requires pocketsphinx)
+* capturing DV via firewire, transcoding.
+* motion sensing
+* face recognition (requires openCV)
+* ... limitless other things
 
-=Installation=
+## Installation
 
 Master Control is fully cross-platform, open-source, and released 
 under the Gnu Public License, Version 3. The following packages, upon 
 which Master Control depends, may be downloaded, or compiled for just 
 about any operating system.
 
-    * [http://www.python.org/ Python 2.7]
-    * [http://www.pygtk.org/ pygtk2]
-    * [http://gstreamer.freedesktop.org/ gstreamer, including gstreamer-python]
-    * [http://gtksourceview.sourceforge.net/ gtksourceview2]
+* [2.7](Python)(http://www.python.org/)
+* [pygtk2](http://www.pygtk.org/)
+* [gstreamer, including gstreamer-python](http://gstreamer.freedesktop.org/)
+* [gtksourceview2](http://gtksourceview.sourceforge.net/)
 
 On Fedora, for example, install these dependencies.
 
@@ -56,24 +56,23 @@ su -c 'yum -y install pygtk2 gstreamer-python gstreamer-plugins-\* gstreamer-ffm
 }}}
 
 Windows builds of these dependencies are available from 
-[https://code.google.com/p/ossbuild/ ossbuild].
+[ossbuild](https://code.google.com/p/ossbuild/).
 
 Master Control is maintained on 
-[https://github.com/themanyone/master_control/ GitHub]. The latest 
+[GitHub](https://github.com/themanyone/master_control/). The latest 
 version may be obtained using git: `git clone 
 https://github.com/themanyone/master_control`
 
-Or download the .zip file: [[Download Now]] class="myButton inline" 
-https://github.com/themanyone/master_control/archive/master.zip
+Or download the .zip file: [Download](https://github.com/themanyone/master_control/archive/master.zip)
 
-=Upgrade=
+## Upgrade
 
 Master Control's capabilities will continue to grow as new GStreamer 
 plugins become available. We are developing our own motion tracking 
 plugin, and non-linear editing may already be possible via 
-[http://freecode.com/projects/gnonlin GNonLin].
+[GNonLin](http://freecode.com/projects/gnonlin).
 
-=Usage=
+## Usage
 
 There is no desktop icon yet. Right-click on the desktop to create one.
 Launching the program may be done via the Python interpreter.
@@ -93,11 +92,11 @@ adjust every possible setting of the running GStreamer Pipeline.
 
 Panels may be "popped-out" into their own window from the `View` menu.
 
-Windows note: [https://code.google.com/p/ossbuild/ ossbuild] contains 
+Windows note: [ossbuild](https://code.google.com/p/ossbuild/) contains 
 a build system to support GStreamer for Windows. To make the webcam 
 work on Windows with ossbuild, change `v4l2src` to `ksvideosrc`.
 
-==Known Issues==
+## Known Issues
 
 Master Control's HD webcam recorder may not work for everyone. It 
 assumes the webcam can hardware-encode motion jpeg (MJPEG) video. If 
@@ -106,11 +105,11 @@ caps, and get rid of the `jpegdec` decoder. To discover the webcam's
 capabilities, use `v4l2-ctl --list-formats-ext`. In the future, we 
 may use camerabin, or another such auto-detecing element.
 
-[http://gentrans.sourceforge.net/docs/head/manual/html/howto.html More info about transcoding with Gstreamer.]
+[More info about transcoding with Gstreamer.](http://gentrans.sourceforge.net/docs/head/manual/html/howto.html)
 
-[http://wiki.oz9aec.net/index.php/Gstreamer_cheat_sheet Gstreamer Cheat Sheet]
+[Gstreamer Cheat Sheet](http://wiki.oz9aec.net/index.php/Gstreamer_cheat_sheet)
 
-==GStreamer Pipelines==
+## GStreamer Pipelines
 
 According to the 
 [file:///usr/share/doc/gst-entrans-1.0.2/html/howto.html 
@@ -121,7 +120,7 @@ together. An exclamation point, "!" behaves like a "pipe symbol"
 connecting the elements' "src" and "sink" pads. See the man pages for 
 `gst-launch` for more information about constructing GStreamer pipelines.
 
-==Help on Elements==
+## Help on Elements
 
 Double-click on `v4l2src` to highlight it in the Master Control editor. 
 Press Ctrl+I, or navigate to Help -> Inspect selected. A 
@@ -133,17 +132,17 @@ and contrast. These values may be specified in the pipeline at
 startup, or adjusted in the tabs during runtime. Try it out. Change 
 the first stanza in the editor to "v4l2src brightness=200".
 
-==Transport Mechanism==
+## Transport Mechanism
 
 Press the F5 key to stop, and re-start (refresh) the stream. This is 
 the same as pressing the Stop and Play buttons. The interface needs 
 some help. Right now the fast-forward, loop, and rewind buttons may be found under the `Go` menu.
 
-==Use Tabs==
+## Use Tabs
 
 Click on the v4l2src tab and adjust values of brightness, and contrast to suit.
 
-==Error Handling==
+## Error Handling
 
 Master Control pipelines are equivalent to running entrans in raw 
 mode. There is some rudimentary error handling, and auto-plugging of 
@@ -154,7 +153,7 @@ src or filter element is supplying a format that the next one in the
 chain does not understand. A good reading of the GStreamer 
 documentation will help to minimize errors.
 
-===Matching Caps===
+## Matching Caps
 
 It is recommended that users inspect (Ctrl-I) the src and sink 
 capabilities (caps) of the elements they wish to connect. Usually, 
